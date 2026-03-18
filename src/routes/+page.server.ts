@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
 
 export const load = () => {
-  redirect(303, '/app/invoices/new');
+  redirect(303, '/app/clients');
 };

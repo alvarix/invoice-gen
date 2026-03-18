@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(pdftotext -layout '/Users/alvarsirlin/Documents/Invoices/2026/Invoice-wmw-2026-1.pdf' -)",
+      "Bash(pip3 install:*)",
+      "Bash(bash /Users/alvarsirlin/.claude/plugins/cache/superpowers-marketplace/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh --project-dir /Users/alvarsirlin/Sites/apps/invoice-gen)",
+      "Bash(npm install:*)",
+      "Bash(pkill -f \"vite dev\")",
+      "Bash(git check-ignore:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls -la /Users/alvarsirlin/Sites/apps/invoice-gen/.env*)",
+      "Bash(npm run:*)",
+      "Bash(git init:*)",
+      "Bash(ls -la /Users/alvarsirlin/Sites/apps/invoice-gen/src/lib/*.ts /Users/alvarsirlin/Sites/apps/invoice-gen/src/lib/server/*.ts)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
