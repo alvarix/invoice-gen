@@ -13,8 +13,16 @@ export const load: PageServerLoad = async ({ url }) => {
   if (clientId) query = query.eq('client_id', clientId);
   if (status) query = query.eq('status', status);
 
-  const { data: invoices } = await query;
-  const { data: clients } = await supabase.from('clients').select('id, name').order('name');
+  const { data: invoices, error: invoicesError } = await query;
+  if (invoicesError) console.error('Failed to load invoices:', invoicesError);
 
-  return { invoices: invoices ?? [], clients: clients ?? [] };
+  const { data: clients, error: clientsError } = await supabase.from('clients').select('id, name').order('name');
+  if (clientsError) console.error('Failed to load clients:', clientsError);
+
+  return {
+    invoices: invoices ?? [],
+    clients: clients ?? [],
+    activeClient: clientId ?? '',
+    activeStatus: status ?? ''
+  };
 };

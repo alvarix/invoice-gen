@@ -4,19 +4,6 @@
 
   let { data }: { data: PageData } = $props();
 
-  /** Active client filter from current URL params (populated server-side via load) */
-  let selectedClient = $state(
-    typeof window !== 'undefined'
-      ? new URL(window.location.href).searchParams.get('client') ?? ''
-      : ''
-  );
-
-  /** Active status filter from current URL params */
-  let selectedStatus = $state(
-    typeof window !== 'undefined'
-      ? new URL(window.location.href).searchParams.get('status') ?? ''
-      : ''
-  );
 
   /**
    * Map a status string to a Tailwind badge class.
@@ -40,7 +27,7 @@
       <select
         id="client-filter"
         name="client"
-        value={selectedClient}
+        value={data.activeClient}
         class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a1a6e]"
       >
         <option value="">All clients</option>
@@ -55,7 +42,7 @@
       <select
         id="status-filter"
         name="status"
-        value={selectedStatus}
+        value={data.activeStatus}
         class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a1a6e]"
       >
         <option value="">All</option>
@@ -80,7 +67,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm border-collapse">
         <thead>
-          <tr class="text-left text-xs uppercase tracking-wide" style="background:#1a1a6e; color:#fff;">
+          <tr class="text-left text-xs uppercase tracking-wide bg-[#1a1a6e] text-white">
             <th class="px-4 py-3 font-semibold">Invoice #</th>
             <th class="px-4 py-3 font-semibold">Client</th>
             <th class="px-4 py-3 font-semibold">Date</th>
