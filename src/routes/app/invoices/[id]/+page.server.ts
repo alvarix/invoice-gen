@@ -24,9 +24,12 @@ export const actions: Actions = {
   updateStatus: async ({ request, params }) => {
     const data = await request.formData();
     const status = data.get('status') as string;
+    const allowed = ['draft', 'sent', 'paid'];
+    if (!allowed.includes(status)) return fail(400, { error: 'Invalid status' });
     const update: Record<string, string> = { status };
     if (status === 'paid') update.paid_date = new Date().toISOString().split('T')[0];
-    await supabase.from('invoices').update(update).eq('id', params.id);
+    const { error: updateError } = await supabase.from('invoices').update(update).eq('id', params.id);
+    if (updateError) return fail(500, { error: 'Failed to update status' });
   },
 
   /**
@@ -43,10 +46,12 @@ export const actions: Actions = {
     if (!itemsJson) return fail(400, { error: 'No items provided' });
     const items = JSON.parse(itemsJson);
 
+    // delete is fire-and-forget; insert result is checked below
     await supabase.from('line_items').delete().eq('invoice_id', params.id);
-    await supabase.from('line_items').insert(
+    const { error: insertError } = await supabase.from('line_items').insert(
       items.map((item: Record<string, unknown>, i: number) => ({ ...item, invoice_id: params.id, sort_order: i }))
     );
+    if (insertError) return fail(500, { error: 'Failed to save line items' });
 
     const { calculateTotals } = await import('$lib/server/invoice');
     const { data: inv } = await supabase.from('invoices').select('tax_rate').eq('id', params.id).single();
@@ -67,13 +72,17 @@ export const actions: Actions = {
     const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
     const publicUrl = `${url.origin}/invoices/${invoice.public_token}`;
 
-    await sendInvoiceEmail(
-      invoice.clients.email,
-      invoice.clients.name,
-      invoice.invoice_number,
-      publicUrl,
-      settings?.owner_name ?? 'Alvar Sirlin'
-    );
+    try {
+      await sendInvoiceEmail(
+        invoice.clients.email,
+        invoice.clients.name,
+        invoice.invoice_number,
+        publicUrl,
+        settings?.owner_name ?? 'Alvar Sirlin'
+      );
+    } catch (err) {
+      return fail(500, { error: 'Failed to send email. Please try again.' });
+    }
 
     await supabase.from('invoices').update({ status: 'sent' }).eq('id', params.id);
   }

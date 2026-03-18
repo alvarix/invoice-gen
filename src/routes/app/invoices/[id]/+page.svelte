@@ -21,14 +21,6 @@
   /** Total including tax */
   let editTotal = $derived(editSubtotal + editTaxAmount);
 
-  /** Total hours from time items for the preview section */
-  let totalHours = $derived(
-    data.items
-      .filter((i) => i.type === 'time' && i.duration_rounded)
-      .map((i) => i.duration_rounded ?? '')
-      .join(', ')
-  );
-
   /**
    * Remove an editable line item by index.
    * @param index - position in editItems to remove
