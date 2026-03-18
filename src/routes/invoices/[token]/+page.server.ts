@@ -12,5 +12,5 @@ export const load: PageServerLoad = async ({ params }) => {
 
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
 
-  return { invoice, client: invoice.clients, items: items ?? [], settings };
+  return { invoice, client: invoice.clients, items: items ?? [], settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null } };
 };

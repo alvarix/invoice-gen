@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
 
-  return { invoice, items: items ?? [], settings };
+  return { invoice, items: items ?? [], settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null } };
 };
 
 export const actions: Actions = {

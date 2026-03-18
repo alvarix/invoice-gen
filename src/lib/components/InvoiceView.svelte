@@ -54,7 +54,7 @@
     </div>
     <div>
       <div class="font-bold mb-1">Pay to:</div>
-      <div>{settings.owner_name}</div>
+      {#if settings.owner_name}<div>{settings.owner_name}</div>{/if}
       {#if settings.address}
         {#each settings.address.split('\n') as line}
           <div>{line}</div>
