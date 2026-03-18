@@ -3,6 +3,7 @@
   import type { LineItem } from '$lib/types';
   import { formatCurrency, formatDate } from '$lib/utils';
   import { enhance } from '$app/forms';
+  import InvoiceView from '$lib/components/InvoiceView.svelte';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -246,90 +247,6 @@
   {/if}
 
   <!-- Invoice preview -->
-  <section class="border border-gray-200 rounded-lg p-8 bg-white space-y-6 text-sm">
-    <!-- Preview header -->
-    <div class="flex justify-between items-start">
-      <div>
-        <h2 class="text-xl font-bold" style="color:#1a1a6e;">INVOICE</h2>
-        <p class="font-mono text-base mt-1" style="color:#e8501a;">{data.invoice.invoice_number}</p>
-      </div>
-      <div class="text-right text-gray-600 space-y-0.5">
-        <p><span class="font-semibold text-gray-700">Date:</span> {formatDate(data.invoice.invoice_date)}</p>
-        {#if data.invoice.due_date}
-          <p><span class="font-semibold text-gray-700">Due:</span> {formatDate(data.invoice.due_date)}</p>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Bill to / Pay to -->
-    <div class="grid grid-cols-2 gap-8">
-      <div>
-        <h3 class="text-xs font-bold uppercase tracking-wide mb-1" style="color:#1a1a6e;">Billed To</h3>
-        <p class="font-semibold">{data.invoice.clients.name}</p>
-        {#if data.invoice.clients.company}
-          <p class="text-gray-600">{data.invoice.clients.company}</p>
-        {/if}
-        {#if data.invoice.clients.project}
-          <p class="text-gray-500 italic">{data.invoice.clients.project}</p>
-        {/if}
-      </div>
-      <div>
-        <h3 class="text-xs font-bold uppercase tracking-wide mb-1" style="color:#1a1a6e;">Pay To</h3>
-        {#if data.settings?.owner_name}
-          <p class="font-semibold">{data.settings.owner_name}</p>
-        {/if}
-        {#if data.settings?.address}
-          {#each data.settings.address.split('\n') as line}
-            <p class="text-gray-600">{line}</p>
-          {/each}
-        {/if}
-        {#if data.settings?.zelle}
-          <p class="text-gray-600 mt-1">Zelle: <span class="font-medium">{data.settings.zelle}</span></p>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Line items table -->
-    <table class="w-full border-collapse">
-      <thead>
-        <tr style="background:#1a1a6e; color:#fff;">
-          <th class="px-3 py-2 text-left font-semibold text-xs uppercase tracking-wide">Description</th>
-          <th class="px-3 py-2 text-right font-semibold text-xs uppercase tracking-wide w-24">Hours</th>
-          <th class="px-3 py-2 text-right font-semibold text-xs uppercase tracking-wide w-28">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each data.items as item (item.id)}
-          <tr class="border-b border-gray-100">
-            <td class="px-3 py-2 text-gray-800">{item.description}</td>
-            <td class="px-3 py-2 text-right font-mono text-xs" style="color:#e8501a;">
-              {item.duration_rounded ?? '—'}
-            </td>
-            <td class="px-3 py-2 text-right">
-              {formatCurrency(item.amount, data.invoice.clients.currency)}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-
-    <!-- Totals -->
-    <div class="ml-auto w-64 space-y-1 text-sm">
-      <div class="flex justify-between text-gray-600">
-        <span>Subtotal</span>
-        <span>{formatCurrency(data.invoice.subtotal, data.invoice.clients.currency)}</span>
-      </div>
-      {#if data.invoice.tax_rate > 0}
-        <div class="flex justify-between text-gray-600">
-          <span>Tax ({(data.invoice.tax_rate * 100).toFixed(0)}%)</span>
-          <span>{formatCurrency(data.invoice.tax_amount, data.invoice.clients.currency)}</span>
-        </div>
-      {/if}
-      <div class="flex justify-between font-bold text-lg border-t border-gray-300 pt-2" style="color:#1a1a6e;">
-        <span>Total</span>
-        <span>{formatCurrency(data.invoice.total, data.invoice.clients.currency)}</span>
-      </div>
-    </div>
-  </section>
+  <InvoiceView invoice={data.invoice} items={data.items} client={data.invoice.clients} settings={data.settings} />
 
 </div>
