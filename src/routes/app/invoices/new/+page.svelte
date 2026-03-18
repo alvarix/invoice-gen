@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData, ActionData } from './$types';
+  import { formatCurrency } from '$lib/utils';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -81,13 +82,6 @@
     hidden.value = JSON.stringify(items);
   }
 
-  /**
-   * Format a number as a USD currency string.
-   * @param n - numeric value to format
-   */
-  function fmt(n: number) {
-    return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  }
 </script>
 
 <div class="max-w-4xl mx-auto p-6 space-y-8">
@@ -165,8 +159,7 @@
           type="file"
           name="csv_file"
           accept=".csv"
-          class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:text-white"
-          style="--file-bg: #e8501a;"
+          class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#e8501a] file:cursor-pointer"
         />
         <button
           type="submit"
@@ -255,17 +248,17 @@
       <div class="ml-auto w-64 space-y-1 text-sm text-right pt-2">
         <div class="flex justify-between">
           <span class="text-gray-600">Subtotal</span>
-          <span class="font-medium">{fmt(subtotal)}</span>
+          <span class="font-medium">{formatCurrency(subtotal)}</span>
         </div>
         {#if selectedClient && selectedClient.tax_rate > 0}
           <div class="flex justify-between text-gray-600">
             <span>Tax ({(selectedClient.tax_rate * 100).toFixed(0)}%)</span>
-            <span>{fmt(taxAmount)}</span>
+            <span>{formatCurrency(taxAmount)}</span>
           </div>
         {/if}
         <div class="flex justify-between font-bold border-t border-gray-300 pt-1" style="color:#1a1a6e;">
           <span>Total</span>
-          <span>{fmt(total)}</span>
+          <span>{formatCurrency(total)}</span>
         </div>
       </div>
 

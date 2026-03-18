@@ -1,7 +1,7 @@
 import { supabase } from '$lib/server/supabase';
 import { parseTogglPaste, parseTogglCSV } from '$lib/server/toggl';
 import { generateInvoiceNumber, calculateTotals } from '$lib/server/invoice';
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -16,6 +16,7 @@ export const actions: Actions = {
     const text = data.get('toggl_text') as string;
     const clientId = data.get('client_id') as string;
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
+    if (!client) return fail(400, { error: 'Client not found' });
     const entries = parseTogglPaste(text);
     const items = entries.map((e, i) => ({
       type: 'time' as const,
@@ -36,6 +37,7 @@ export const actions: Actions = {
     const text = await file.text();
     const clientId = data.get('client_id') as string;
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
+    if (!client) return fail(400, { error: 'Client not found' });
     const entries = parseTogglCSV(text);
     const items = entries.map((e, i) => ({
       type: 'time' as const,
@@ -59,6 +61,7 @@ export const actions: Actions = {
     const items = JSON.parse(itemsJson);
 
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
+    if (!client) return fail(400, { error: 'Client not found' });
 
     // Increment seq
     const seq = client.invoice_seq + 1;
@@ -75,6 +78,7 @@ export const actions: Actions = {
       tax_rate: client.tax_rate,
       ...totals,
     }).select().single();
+    if (!invoice) return fail(500, { error: 'Failed to create invoice' });
 
     await supabase.from('line_items').insert(
       items.map((item: Record<string, unknown>, i: number) => ({ ...item, invoice_id: invoice.id, sort_order: i }))
