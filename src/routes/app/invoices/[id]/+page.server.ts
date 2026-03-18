@@ -40,6 +40,7 @@ export const actions: Actions = {
 
     const data = await request.formData();
     const itemsJson = data.get('items') as string;
+    if (!itemsJson) return fail(400, { error: 'No items provided' });
     const items = JSON.parse(itemsJson);
 
     await supabase.from('line_items').delete().eq('invoice_id', params.id);

@@ -163,7 +163,7 @@
           <thead>
             <tr class="text-left" style="background:#1a1a6e; color:#fff;">
               <th class="px-3 py-2 font-semibold">Description</th>
-              <th class="px-3 py-2 font-semibold w-28">Rounded</th>
+              <th class="px-3 py-2 font-semibold w-28" style="color:#e8501a;">Rounded</th>
               <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
               <th class="px-3 py-2 w-10"></th>
             </tr>
@@ -178,7 +178,7 @@
                     class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
                   />
                 </td>
-                <td class="px-3 py-1.5">
+                <td class="px-3 py-1.5" style="color:#e8501a;">
                   {#if item.type === 'time'}
                     <input
                       type="text"
