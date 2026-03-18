@@ -13,6 +13,6 @@ export const actions: Actions = {
     }
 
     setSession(event);
-    redirect(303, '/app/clients');
+    redirect(303, '/app/invoices/new');
   }
 };
