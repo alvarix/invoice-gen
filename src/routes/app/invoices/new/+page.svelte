@@ -65,6 +65,38 @@
   }
 
   /**
+   * Round a duration string "h:mm:ss" or "h:mm" up to the nearest 15 minutes.
+   * Returns "h:mm" format.
+   * @param raw - raw duration string
+   */
+  function roundDuration(raw: string): string {
+    const parts = raw.trim().split(':').map(Number);
+    let totalSeconds = 0;
+    if (parts.length === 3) totalSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    else if (parts.length === 2) totalSeconds = parts[0] * 3600 + parts[1] * 60;
+    if (totalSeconds <= 0) return '0:15';
+    const fifteenMin = 15 * 60;
+    const rounded = Math.ceil(totalSeconds / fifteenMin) * fifteenMin;
+    const h = Math.floor(rounded / 3600);
+    const m = Math.floor((rounded % 3600) / 60);
+    return `${h}:${String(m).padStart(2, '0')}`;
+  }
+
+  /**
+   * Recalculate rounded duration and amount when raw duration changes.
+   * @param index - position in items array
+   * @param rawValue - new raw duration string
+   */
+  function onRawDurationChange(index: number, rawValue: string) {
+    items[index].duration_raw = rawValue;
+    items[index].duration_rounded = roundDuration(rawValue);
+    const rate = items[index].rate ?? 0;
+    const parts = items[index].duration_rounded!.split(':').map(Number);
+    const hours = parts[0] + (parts[1] || 0) / 60;
+    items[index].amount = Math.round(hours * rate * 100) / 100;
+  }
+
+  /**
    * Add a blank time entry row at the end (time group).
    */
   function addTimeEntry() {
@@ -73,7 +105,7 @@
       {
         type: 'time',
         description: '',
-        duration_raw: null,
+        duration_raw: '0:15:00',
         duration_rounded: '0:15',
         rate: selectedClient?.hourly_rate ?? 0,
         amount: 0,
@@ -222,94 +254,106 @@
   {#if items.length > 0}
     <section class="space-y-3">
       <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Line Items</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm border-collapse">
-          <thead>
-            <tr class="text-left" style="background:#1a1a6e; color:#fff;">
-              <th class="px-3 py-2 font-semibold">Description</th>
-              <th class="px-3 py-2 font-semibold w-24">Raw</th>
-              <th class="px-3 py-2 font-semibold w-24">Rounded</th>
-              <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
-              <th class="px-3 py-2 w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Expense rows (top) -->
-            {#each items as item, i (i)}
-              {#if item.type === 'expense'}
-                <tr class="border-b border-gray-200 hover:bg-gray-50 bg-amber-50/50">
-                  <td class="px-3 py-1.5">
-                    <input
-                      type="text"
-                      bind:value={item.description}
-                      placeholder="Expense description"
-                      class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                    />
-                  </td>
-                  <td class="px-3 py-1.5 text-gray-400 text-xs">—</td>
-                  <td class="px-3 py-1.5 text-gray-400 text-xs">—</td>
-                  <td class="px-3 py-1.5 text-right">
-                    <input
-                      type="number"
-                      step="0.01"
-                      bind:value={item.amount}
-                      class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                    />
-                  </td>
-                  <td class="px-3 py-1.5 text-center">
-                    <button type="button" onclick={() => deleteRow(i)}
-                      class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
-                      aria-label="Delete row">x</button>
-                  </td>
-                </tr>
-              {/if}
-            {/each}
+      <!-- Expenses table -->
+      {#if expenseItems.length > 0}
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+                <th class="px-3 py-2 font-semibold">Expense</th>
+                <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
+                <th class="px-3 py-2 w-10"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each items as item, i (i)}
+                {#if item.type === 'expense'}
+                  <tr class="border-b border-gray-200 hover:bg-gray-50 bg-amber-50/50">
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="text"
+                        bind:value={item.description}
+                        placeholder="Expense description"
+                        class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5 text-right">
+                      <input
+                        type="number"
+                        step="0.01"
+                        bind:value={item.amount}
+                        class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5 text-center">
+                      <button type="button" onclick={() => deleteRow(i)}
+                        class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
+                        aria-label="Delete row">x</button>
+                    </td>
+                  </tr>
+                {/if}
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
 
-            <!-- Separator between expenses and time entries -->
-            {#if expenseItems.length > 0 && timeItems.length > 0}
-              <tr><td colspan="5" class="py-1"><hr class="border-[#1a1a6e]/20" /></td></tr>
-            {/if}
-
-            <!-- Time entry rows (bottom) -->
-            {#each items as item, i (i)}
-              {#if item.type === 'time'}
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                  <td class="px-3 py-1.5">
-                    <input
-                      type="text"
-                      bind:value={item.description}
-                      class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                    />
-                  </td>
-                  <td class="px-3 py-1.5 text-gray-500 font-mono text-xs">
-                    {item.duration_raw ?? '—'}
-                  </td>
-                  <td class="px-3 py-1.5">
-                    <input
-                      type="text"
-                      bind:value={item.duration_rounded}
-                      class="w-full border-0 bg-transparent font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                    />
-                  </td>
-                  <td class="px-3 py-1.5 text-right">
-                    <input
-                      type="number"
-                      step="0.01"
-                      bind:value={item.amount}
-                      class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                    />
-                  </td>
-                  <td class="px-3 py-1.5 text-center">
-                    <button type="button" onclick={() => deleteRow(i)}
-                      class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
-                      aria-label="Delete row">x</button>
-                  </td>
-                </tr>
-              {/if}
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <!-- Time entries table -->
+      {#if timeItems.length > 0}
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+                <th class="px-3 py-2 font-semibold">Description</th>
+                <th class="px-3 py-2 font-semibold w-24">Raw</th>
+                <th class="px-3 py-2 font-semibold w-24" style="color:#ff3103;">Rounded</th>
+                <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
+                <th class="px-3 py-2 w-10"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each items as item, i (i)}
+                {#if item.type === 'time'}
+                  <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="text"
+                        bind:value={item.description}
+                        class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="text"
+                        value={item.duration_raw ?? ''}
+                        oninput={(e) => onRawDurationChange(i, (e.currentTarget as HTMLInputElement).value)}
+                        placeholder="h:mm:ss"
+                        class="w-full border-0 bg-transparent font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5 font-mono text-xs" style="color:#ff3103;">
+                      {item.duration_rounded ?? '—'}
+                    </td>
+                    <td class="px-3 py-1.5 text-right">
+                      <input
+                        type="number"
+                        step="0.01"
+                        bind:value={item.amount}
+                        class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5 text-center">
+                      <button type="button" onclick={() => deleteRow(i)}
+                        class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
+                        aria-label="Delete row">x</button>
+                    </td>
+                  </tr>
+                {/if}
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
 
       <div class="flex gap-4">
         <button

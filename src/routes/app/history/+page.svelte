@@ -1,9 +1,16 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { formatCurrency, formatDate } from '$lib/utils';
+  import { enhance } from '$app/forms';
+  import Spinner from '$lib/components/Spinner.svelte';
 
   let { data }: { data: PageData } = $props();
 
+  /** ID of the invoice pending deletion (shows confirmation) */
+  let confirmDeleteId = $state<string | null>(null);
+
+  /** Whether a delete is in progress */
+  let deleting = $state(false);
 
   /**
    * Map a status string to a Tailwind badge class.
@@ -73,6 +80,7 @@
             <th class="px-4 py-3 font-semibold">Date</th>
             <th class="px-4 py-3 font-semibold">Status</th>
             <th class="px-4 py-3 font-semibold text-right">Total</th>
+            <th class="px-4 py-3 w-10"></th>
           </tr>
         </thead>
         <tbody>
@@ -99,6 +107,44 @@
               </td>
               <td class="px-4 py-3 text-right font-medium">
                 {formatCurrency(invoice.total)}
+              </td>
+              <td class="px-4 py-3 text-center">
+                {#if confirmDeleteId === invoice.id}
+                  <form method="POST" action="?/deleteInvoice" use:enhance={() => {
+                    deleting = true;
+                    return async ({ update }) => {
+                      deleting = false;
+                      confirmDeleteId = null;
+                      await update();
+                    };
+                  }}>
+                    <input type="hidden" name="invoice_id" value={invoice.id} />
+                    <div class="flex items-center gap-1">
+                      <button
+                        type="submit"
+                        disabled={deleting}
+                        class="text-xs font-semibold text-red-600 hover:text-red-800 active:text-red-900 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+                      >
+                        {#if deleting}<Spinner />{/if}
+                        Yes
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => (confirmDeleteId = null)}
+                        class="text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </form>
+                {:else}
+                  <button
+                    type="button"
+                    onclick={() => (confirmDeleteId = invoice.id)}
+                    class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
+                    aria-label="Delete invoice"
+                  >x</button>
+                {/if}
               </td>
             </tr>
           {/each}

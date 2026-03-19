@@ -1,5 +1,6 @@
 import { supabase } from '$lib/server/supabase';
-import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
   const clientId = url.searchParams.get('client');
@@ -25,4 +26,31 @@ export const load: PageServerLoad = async ({ url }) => {
     activeClient: clientId ?? '',
     activeStatus: status ?? ''
   };
+};
+
+export const actions: Actions = {
+  /**
+   * Delete an invoice and its line items.
+   * @param request - form data containing invoice_id
+   */
+  deleteInvoice: async ({ request }) => {
+    const data = await request.formData();
+    const invoiceId = data.get('invoice_id') as string;
+    if (!invoiceId) return fail(400, { error: 'Missing invoice ID' });
+
+    // Delete line items first (FK constraint)
+    const { error: itemsError } = await supabase
+      .from('line_items').delete().eq('invoice_id', invoiceId);
+    if (itemsError) {
+      console.error('Failed to delete line items:', itemsError);
+      return fail(500, { error: 'Failed to delete line items' });
+    }
+
+    const { error: invoiceError } = await supabase
+      .from('invoices').delete().eq('id', invoiceId);
+    if (invoiceError) {
+      console.error('Failed to delete invoice:', invoiceError);
+      return fail(500, { error: 'Failed to delete invoice' });
+    }
+  }
 };
