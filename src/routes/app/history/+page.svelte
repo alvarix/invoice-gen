@@ -54,7 +54,7 @@
 
     <button
       type="submit"
-      class="px-4 py-2 rounded text-white text-sm font-medium bg-[#1a1a6e] hover:bg-[#14145a] transition-colors"
+      class="px-4 py-2 rounded text-white text-sm font-medium bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] transition-colors"
     >
       Filter
     </button>

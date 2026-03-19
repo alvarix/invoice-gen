@@ -61,6 +61,20 @@ export const actions: Actions = {
   },
 
   /**
+   * Update the invoice number field.
+   * @param request - form data containing invoice_number
+   * @param params - route params with invoice id
+   */
+  updateInvoiceNumber: async ({ request, params }) => {
+    const data = await request.formData();
+    const invoice_number = (data.get('invoice_number') as string)?.trim();
+    if (!invoice_number) return fail(400, { error: 'Invoice number required' });
+    const { error: updateError } = await supabase
+      .from('invoices').update({ invoice_number }).eq('id', params.id);
+    if (updateError) return fail(500, { error: 'Failed to update invoice number' });
+  },
+
+  /**
    * Send invoice email to client via Brevo and mark invoice as sent.
    * Requires client to have an email address on record.
    */
@@ -70,7 +84,11 @@ export const actions: Actions = {
     if (!invoice?.clients?.email) return fail(400, { error: 'Client has no email' });
 
     const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
-    const publicUrl = `${url.origin}/invoices/${invoice.public_token}`;
+
+    // Use PUBLIC_BASE_URL env var for email links; block sending if not set
+    const baseUrl = env.PUBLIC_BASE_URL;
+    if (!baseUrl) return fail(400, { error: 'PUBLIC_BASE_URL not set — cannot send emails with localhost links' });
+    const publicUrl = `${baseUrl}/invoices/${invoice.public_token}`;
 
     try {
       await sendInvoiceEmail(
@@ -81,7 +99,8 @@ export const actions: Actions = {
         settings?.owner_name ?? 'Alvar Sirlin'
       );
     } catch (err) {
-      return fail(500, { error: 'Failed to send email. Please try again.' });
+      console.error('sendEmail error:', err);
+      return fail(500, { error: `Email failed: ${err instanceof Error ? err.message : err}` });
     }
 
     await supabase.from('invoices').update({ status: 'sent' }).eq('id', params.id);

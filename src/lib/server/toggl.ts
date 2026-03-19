@@ -40,8 +40,8 @@ export interface ParsedEntry {
 
 /**
  * Parse Toggl copy/paste text into time entries.
- * Format alternates: description line, duration line, repeat.
- * Keeps prefixes (e.g. "2: design") as-is.
+ * Format per entry: description, [optional count e.g. "(4)"], client/project, duration.
+ * Duration lines match h:mm:ss exactly. Description is used verbatim — no stripping.
  * @param text - raw pasted text from Toggl
  * @returns array of parsed entries
  */
@@ -49,36 +49,30 @@ export function parseTogglPaste(text: string): ParsedEntry[] {
   const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
   const entries: ParsedEntry[] = [];
 
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-    const isDuration = /^\d+:\d{2}(:\d{2})?$/.test(line);
+  for (let i = 0; i < lines.length; i++) {
+    // Duration is always h:mm:ss from Toggl
+    if (!/^\d+:\d{2}:\d{2}$/.test(lines[i])) continue;
 
-    if (!isDuration && lines[i + 1] && /^\d+:\d{2}(:\d{2})?$/.test(lines[i + 1])) {
-      const description = line || 'misc';
-      const duration_raw = lines[i + 1];
-      const rawSeconds = parseDuration(duration_raw);
-      const roundedSeconds = roundUp15(rawSeconds);
-      entries.push({
-        description,
-        duration_raw,
-        duration_rounded: formatDuration(roundedSeconds),
-        hours_rounded: roundedSeconds / 3600
-      });
-      i += 2;
-    } else if (isDuration) {
-      const rawSeconds = parseDuration(line);
-      const roundedSeconds = roundUp15(rawSeconds);
-      entries.push({
-        description: 'misc',
-        duration_raw: line,
-        duration_rounded: formatDuration(roundedSeconds),
-        hours_rounded: roundedSeconds / 3600
-      });
-      i += 1;
-    } else {
-      i += 1;
-    }
+    const duration_raw = lines[i];
+
+    // i-1 is the client/project line (always skip it)
+    // Walk back further past any "(N)" count lines to find the description
+    let descIdx = i - 2;
+    while (descIdx >= 0 && /^\(\d+\)$/.test(lines[descIdx])) descIdx--;
+
+    const description =
+      descIdx >= 0 && !/^\d+:\d{2}:\d{2}$/.test(lines[descIdx])
+        ? lines[descIdx]
+        : 'misc';
+
+    const rawSeconds = parseDuration(duration_raw);
+    const roundedSeconds = roundUp15(rawSeconds);
+    entries.push({
+      description,
+      duration_raw,
+      duration_rounded: formatDuration(roundedSeconds),
+      hours_rounded: roundedSeconds / 3600
+    });
   }
 
   return entries;

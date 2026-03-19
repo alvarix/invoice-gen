@@ -44,6 +44,8 @@ export interface Settings {
   id: number;
   owner_name: string | null;
   address: string | null;
+  email: string | null;
+  phone: string | null;
   zelle: string | null;
   logo_url: string | null;
 }

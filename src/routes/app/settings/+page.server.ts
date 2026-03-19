@@ -13,6 +13,8 @@ export const actions: Actions = {
       id: 1,
       owner_name: data.get('owner_name'),
       address: data.get('address'),
+      email: data.get('email'),
+      phone: data.get('phone'),
       zelle: data.get('zelle'),
     });
   }

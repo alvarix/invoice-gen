@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+@media print {
+  /* Hide everything except the invoice view on print */
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+
+  /* Small header that repeats on every printed page (position:fixed in print) */
+  .print-page-header {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 40px;
+    font-size: 10px;
+    color: #1a1a6e;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+  }
+
+  /* Push first page content below the fixed header */
+  .print-area { padding-top: 36px; }
+
+  /* Hide Print/PDF button */
+  .print\\:hidden { display: none !important; }
+}

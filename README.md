@@ -1,42 +1,67 @@
-# sv
+# Invoice Generator
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A personal invoice management tool for freelancers. Ingest Toggl time entries, generate branded invoices, email them to clients, and track payment status.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **SvelteKit** (Svelte 5 runes) — frontend and server routes
+- **Supabase** (Postgres) — database via service role key (no client-side RLS)
+- **TailwindCSS v4** — styling
+- **Brevo** — transactional email API
+- **Vercel** — deployment via `@sveltejs/adapter-vercel`
+
+## Features
+
+- **Client management** — per-client hourly rates, tax rates, currency, invoice sequences
+- **Toggl ingestion** — paste or CSV upload, auto-rounds to nearest 15 minutes
+- **Expense line items** — add non-time items alongside time entries
+- **Editable invoices** — modify line items, descriptions, amounts, and invoice numbers in draft mode
+- **Invoice lifecycle** — Draft, Sent, Paid status tracking with paid date
+- **Email sending** — preview modal with confirmation, BCC copy to owner, disabled on localhost
+- **Public invoice links** — shareable `/invoices/[token]` pages, no login required
+- **Print/PDF** — clean printable view with repeating header on multi-page invoices
+- **Owner auth** — single password login via `APP_PASSWORD` env var
+
+## Setup
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.12.8 create --template minimal --types ts --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
+cp .env.example .env  # fill in values
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+### Environment variables
 
-To create a production version of your app:
+| Variable | Description |
+|---|---|
+| `PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_KEY` | Supabase service role key |
+| `APP_PASSWORD` | Owner login password |
+| `BREVO_API_KEY` | Brevo transactional email API key |
+| `BREVO_SENDER_EMAIL` | Verified sender email in Brevo |
+| `PUBLIC_BASE_URL` | Production URL (required for email links, blocks sending if unset) |
+
+### Database
+
+Run `supabase/migrations/001_init.sql` in the Supabase SQL editor to create tables. Then add the email/phone columns:
+
+```sql
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS phone text;
+```
+
+## Development
 
 ```sh
-npm run build
+npm run dev          # start dev server on :5173
+npm run build        # production build
+npm run preview      # preview production build
+npx svelte-check     # type checking
 ```
 
-You can preview the production build with `npm run preview`.
+## Deployment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+1. Push to GitHub
+2. Import in Vercel
+3. Add environment variables
+4. Deploy

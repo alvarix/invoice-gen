@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { PageData, ActionData } from './$types';
   import { formatCurrency } from '$lib/utils';
+  import { enhance } from '$app/forms';
+  import Spinner from '$lib/components/Spinner.svelte';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -20,6 +22,10 @@
     amount: number;
     sort_order: number;
   }[]>([]);
+
+  /** Submission states */
+  let parsing = $state(false);
+  let generating = $state(false);
 
   // When an action returns parsed items, replace the current list
   $effect(() => {
@@ -94,7 +100,7 @@
       id="client-select"
       bind:value={selectedClientId}
       class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
-      style="--tw-ring-color: #e8501a;"
+      style="--tw-ring-color: #ff3103;"
     >
       {#each data.clients as client (client.id)}
         <option value={client.id}>{client.name}{client.project ? ` — ${client.project}` : ''}</option>
@@ -109,9 +115,13 @@
         type="button"
         onclick={() => (inputMode = 'paste')}
         class="px-4 py-2 rounded font-medium text-sm border transition-colors"
-        style={inputMode === 'paste'
-          ? 'background:#1a1a6e; color:#fff; border-color:#1a1a6e;'
-          : 'background:#fff; color:#1a1a6e; border-color:#1a1a6e;'}
+        class:bg-[#1a1a6e]={inputMode === 'paste'}
+        class:text-white={inputMode === 'paste'}
+        class:border-[#1a1a6e]={true}
+        class:bg-white={inputMode !== 'paste'}
+        class:text-[#1a1a6e]={inputMode !== 'paste'}
+        class:hover:bg-[#14145a]={inputMode === 'paste'}
+        class:hover:bg-gray-50={inputMode !== 'paste'}
       >
         Paste
       </button>
@@ -119,16 +129,23 @@
         type="button"
         onclick={() => (inputMode = 'csv')}
         class="px-4 py-2 rounded font-medium text-sm border transition-colors"
-        style={inputMode === 'csv'
-          ? 'background:#1a1a6e; color:#fff; border-color:#1a1a6e;'
-          : 'background:#fff; color:#1a1a6e; border-color:#1a1a6e;'}
+        class:bg-[#1a1a6e]={inputMode === 'csv'}
+        class:text-white={inputMode === 'csv'}
+        class:border-[#1a1a6e]={true}
+        class:bg-white={inputMode !== 'csv'}
+        class:text-[#1a1a6e]={inputMode !== 'csv'}
+        class:hover:bg-[#14145a]={inputMode === 'csv'}
+        class:hover:bg-gray-50={inputMode !== 'csv'}
       >
         CSV
       </button>
     </div>
 
     {#if inputMode === 'paste'}
-      <form method="POST" action="?/parseToggl" class="space-y-3">
+      <form method="POST" action="?/parseToggl" class="space-y-3" use:enhance={() => {
+        parsing = true;
+        return async ({ update }) => { parsing = false; await update(); };
+      }}>
         <input type="hidden" name="client_id" value={selectedClientId} />
         <label class="block text-sm font-semibold text-gray-700" for="toggl-paste">
           Paste Toggl entries
@@ -137,19 +154,23 @@
           id="toggl-paste"
           name="toggl_text"
           rows="8"
-          placeholder="description&#10;h:mm:ss&#10;description&#10;h:mm:ss"
+          placeholder="description&#10;Client Project&#10;h:mm:ss&#10;description&#10;Client Project&#10;h:mm:ss"
           class="w-full border border-gray-300 rounded px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
         ></textarea>
         <button
           type="submit"
-          class="px-5 py-2 rounded text-white font-medium text-sm"
-          style="background:#e8501a;"
+          disabled={parsing}
+          class="px-5 py-2 rounded text-white font-medium text-sm transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if parsing}<Spinner />{/if}
           Parse
         </button>
       </form>
     {:else}
-      <form method="POST" action="?/parseCSV" enctype="multipart/form-data" class="space-y-3">
+      <form method="POST" action="?/parseCSV" enctype="multipart/form-data" class="space-y-3" use:enhance={() => {
+        parsing = true;
+        return async ({ update }) => { parsing = false; await update(); };
+      }}>
         <input type="hidden" name="client_id" value={selectedClientId} />
         <label class="block text-sm font-semibold text-gray-700" for="csv-file">
           Upload Toggl CSV
@@ -159,13 +180,14 @@
           type="file"
           name="csv_file"
           accept=".csv"
-          class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#e8501a] file:cursor-pointer"
+          class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#ff3103] file:cursor-pointer file:transition-colors hover:file:bg-[#d04516]"
         />
         <button
           type="submit"
-          class="px-5 py-2 rounded text-white font-medium text-sm"
-          style="background:#e8501a;"
+          disabled={parsing}
+          class="px-5 py-2 rounded text-white font-medium text-sm transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if parsing}<Spinner />{/if}
           Parse
         </button>
       </form>
@@ -223,7 +245,7 @@
                   <button
                     type="button"
                     onclick={() => deleteRow(i)}
-                    class="text-gray-400 hover:text-red-500 font-bold text-base leading-none"
+                    class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
                     aria-label="Delete row"
                   >
                     x
@@ -238,8 +260,8 @@
       <button
         type="button"
         onclick={addExpense}
-        class="text-sm font-medium underline"
-        style="color:#e8501a;"
+        class="text-sm font-medium underline transition-colors hover:text-[#b83d13] active:text-[#8a2e0e]"
+        style="color:#ff3103;"
       >
         + Add expense row
       </button>
@@ -267,6 +289,10 @@
         method="POST"
         action="?/generate"
         onsubmit={onGenerateSubmit}
+        use:enhance={() => {
+          generating = true;
+          return async ({ update }) => { generating = false; await update(); };
+        }}
         class="space-y-4 pt-2"
       >
         <input type="hidden" name="items" />
@@ -300,9 +326,10 @@
 
         <button
           type="submit"
-          class="px-6 py-2.5 rounded text-white font-semibold text-sm"
-          style="background:#1a1a6e;"
+          disabled={generating}
+          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if generating}<Spinner />{/if}
           Generate Invoice
         </button>
       </form>

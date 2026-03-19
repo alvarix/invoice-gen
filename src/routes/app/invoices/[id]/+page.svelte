@@ -4,6 +4,7 @@
   import { formatCurrency, formatDate } from '$lib/utils';
   import { enhance } from '$app/forms';
   import InvoiceView from '$lib/components/InvoiceView.svelte';
+  import Spinner from '$lib/components/Spinner.svelte';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -21,6 +22,14 @@
 
   /** Total including tax */
   let editTotal = $derived(editSubtotal + editTaxAmount);
+
+  /** Form submission states — prevents double clicks */
+  let statusSubmitting = $state(false);
+  let savingItems = $state(false);
+  let sending = $state(false);
+
+  /** Controls the email confirmation modal */
+  let showEmailModal = $state(false);
 
   /**
    * Remove an editable line item by index.
@@ -63,9 +72,12 @@
   /**
    * Copy the public invoice link to clipboard.
    */
+  let copied = $state(false);
   async function copyLink() {
     const url = `${window.location.origin}/invoices/${data.invoice.public_token}`;
     await navigator.clipboard.writeText(url);
+    copied = true;
+    setTimeout(() => (copied = false), 2000);
   }
 
   /** Status badge colors */
@@ -74,15 +86,39 @@
     sent: 'background:#2563eb; color:#fff;',
     paid: 'background:#16a34a; color:#fff;',
   };
+
+  /** Owner name for email preview */
+  let ownerName = $derived(data.settings?.owner_name ?? 'Alvar Sirlin');
+
+  /** Client record from joined invoice data */
+  let client = $derived(data.invoice.clients);
+
+  /** Whether running on localhost — email sending is disabled */
+  let isLocalhost = $derived(
+    typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  );
 </script>
 
 <div class="max-w-4xl mx-auto p-6 space-y-8">
 
   <!-- Header -->
   <div class="flex items-center gap-4 flex-wrap">
-    <h1 class="text-2xl font-bold" style="color: #1a1a6e;">
-      Invoice {data.invoice.invoice_number}
-    </h1>
+    <form
+      method="POST"
+      action="?/updateInvoiceNumber"
+      use:enhance
+      id="invoice-number-form"
+    >
+      <input
+        type="text"
+        name="invoice_number"
+        value={data.invoice.invoice_number}
+        onblur={(e) => (e.currentTarget.form as HTMLFormElement).requestSubmit()}
+        class="text-2xl font-bold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-orange-400 focus:outline-none px-1"
+        style="color: #1a1a6e;"
+        aria-label="Invoice number"
+      />
+    </form>
 
     <span
       class="px-3 py-1 rounded-full text-sm font-semibold capitalize"
@@ -94,34 +130,42 @@
     <button
       type="button"
       onclick={copyLink}
-      class="ml-auto px-4 py-1.5 rounded border text-sm font-medium transition-colors"
-      style="border-color:#1a1a6e; color:#1a1a6e;"
+      class="ml-auto px-4 py-1.5 rounded border text-sm font-medium transition-colors hover:bg-[#1a1a6e] hover:text-white active:bg-[#14145a] active:text-white"
+      style="border-color:#1a1a6e; color:{copied ? '#fff' : '#1a1a6e'}; background:{copied ? '#16a34a' : 'transparent'};"
     >
-      Copy Link
+      {copied ? 'Copied' : 'Copy Link'}
     </button>
   </div>
 
   <!-- Status actions -->
   <div class="flex items-center gap-4 flex-wrap">
     {#if data.invoice.status === 'draft'}
-      <form method="POST" action="?/updateStatus" use:enhance>
+      <form method="POST" action="?/updateStatus" use:enhance={() => {
+        statusSubmitting = true;
+        return async ({ update }) => { statusSubmitting = false; await update(); };
+      }}>
         <input type="hidden" name="status" value="sent" />
         <button
           type="submit"
-          class="px-5 py-2 rounded text-white text-sm font-medium"
-          style="background:#2563eb;"
+          disabled={statusSubmitting}
+          class="px-5 py-2 rounded text-white text-sm font-medium transition-colors bg-[#2563eb] hover:bg-[#1d4ed8] active:bg-[#1e40af] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if statusSubmitting}<Spinner />{/if}
           Mark Sent
         </button>
       </form>
     {:else if data.invoice.status === 'sent'}
-      <form method="POST" action="?/updateStatus" use:enhance>
+      <form method="POST" action="?/updateStatus" use:enhance={() => {
+        statusSubmitting = true;
+        return async ({ update }) => { statusSubmitting = false; await update(); };
+      }}>
         <input type="hidden" name="status" value="paid" />
         <button
           type="submit"
-          class="px-5 py-2 rounded text-white text-sm font-medium"
-          style="background:#16a34a;"
+          disabled={statusSubmitting}
+          class="px-5 py-2 rounded text-white text-sm font-medium transition-colors bg-[#16a34a] hover:bg-[#15803d] active:bg-[#166534] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if statusSubmitting}<Spinner />{/if}
           Mark Paid
         </button>
       </form>
@@ -131,21 +175,101 @@
       </p>
     {/if}
 
-    <!-- Send Email -->
-    <form method="POST" action="?/sendEmail" use:enhance>
-      <button
-        type="submit"
-        class="px-5 py-2 rounded text-white text-sm font-medium"
-        style="background:#e8501a;"
-      >
-        Send Email
-      </button>
-    </form>
+    <!-- Preview Email — always available; Send inside modal is disabled on localhost -->
+    <button
+      type="button"
+      onclick={() => (showEmailModal = true)}
+      class="px-5 py-2 rounded text-white text-sm font-medium transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13]"
+    >
+      Preview Email
+    </button>
+
+    <!-- Open printable invoice in new tab -->
+    <a
+      href="/invoices/{data.invoice.public_token}"
+      target="_blank"
+      class="px-4 py-1.5 rounded border text-sm font-medium transition-colors border-[#1a1a6e] text-[#1a1a6e] hover:bg-[#1a1a6e] hover:text-white active:bg-[#14145a]"
+    >
+      Print / PDF
+    </a>
 
     {#if form?.error}
       <p class="text-sm text-red-600">{form.error}</p>
     {/if}
   </div>
+
+  <!-- Email confirmation modal -->
+  {#if showEmailModal}
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      onclick={(e) => { if (e.target === e.currentTarget) showEmailModal = false; }}
+      onkeydown={(e) => { if (e.key === 'Escape') showEmailModal = false; }}
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6 space-y-4">
+        <h2 class="text-lg font-bold" style="color: #1a1a6e;">Send Invoice Email</h2>
+
+        <div class="text-sm space-y-2 border rounded p-4 bg-gray-50">
+          <div>
+            <span class="font-semibold text-gray-600">To:</span>
+            {client?.name ?? '—'}
+            {#if client?.email}
+              &lt;{client.email}&gt;
+            {:else}
+              <span class="text-red-500">No email on file</span>
+            {/if}
+          </div>
+          <div>
+            <span class="font-semibold text-gray-600">Subject:</span>
+            Invoice {data.invoice.invoice_number} from {ownerName}
+          </div>
+          <hr class="my-2" />
+          <div class="text-gray-700">
+            <p>Hi {client?.name ?? ''},</p>
+            <p class="mt-1">Please find your invoice <strong>{data.invoice.invoice_number}</strong> at the link below.</p>
+            <p class="mt-1 text-[#2563eb] underline break-all">[public link]</p>
+            <p class="mt-1">{ownerName}</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500">A copy will be sent to your sender email.</p>
+
+        {#if isLocalhost}
+          <p class="text-sm text-amber-600 font-medium">Sending is disabled on localhost. Preview only.</p>
+        {/if}
+
+        <div class="flex gap-3 pt-2">
+          <form method="POST" action="?/sendEmail" use:enhance={() => {
+            sending = true;
+            return async ({ update, result }) => {
+              sending = false;
+              if (result.type !== 'failure') showEmailModal = false;
+              await update();
+            };
+          }}>
+            <button
+              type="submit"
+              disabled={sending || !client?.email || isLocalhost}
+              class="px-5 py-2 rounded text-white text-sm font-semibold transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            >
+              {#if sending}<Spinner />{/if}
+              Confirm & Send
+            </button>
+          </form>
+          <button
+            type="button"
+            onclick={() => (showEmailModal = false)}
+            disabled={sending}
+            class="px-5 py-2 rounded border text-sm font-medium transition-colors border-gray-300 text-gray-700 hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Editable line items (draft only) -->
   {#if isDraft}
@@ -156,7 +280,7 @@
           <thead>
             <tr class="text-left" style="background:#1a1a6e; color:#fff;">
               <th class="px-3 py-2 font-semibold">Description</th>
-              <th class="px-3 py-2 font-semibold w-28" style="color:#e8501a;">Rounded</th>
+              <th class="px-3 py-2 font-semibold w-28" style="color:#ff3103;">Rounded</th>
               <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
               <th class="px-3 py-2 w-10"></th>
             </tr>
@@ -171,7 +295,7 @@
                     class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
                   />
                 </td>
-                <td class="px-3 py-1.5" style="color:#e8501a;">
+                <td class="px-3 py-1.5" style="color:#ff3103;">
                   {#if item.type === 'time'}
                     <input
                       type="text"
@@ -194,7 +318,7 @@
                   <button
                     type="button"
                     onclick={() => deleteRow(i)}
-                    class="text-gray-400 hover:text-red-500 font-bold text-base leading-none"
+                    class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
                     aria-label="Delete row"
                   >
                     x
@@ -209,8 +333,8 @@
       <button
         type="button"
         onclick={addExpense}
-        class="text-sm font-medium underline"
-        style="color:#e8501a;"
+        class="text-sm font-medium underline transition-colors hover:text-[#b83d13] active:text-[#8a2e0e]"
+        style="color:#ff3103;"
       >
         + Add expense row
       </button>
@@ -233,13 +357,17 @@
         </div>
       </div>
 
-      <form method="POST" action="?/updateLineItems" onsubmit={onSaveSubmit}>
+      <form method="POST" action="?/updateLineItems" onsubmit={onSaveSubmit} use:enhance={() => {
+        savingItems = true;
+        return async ({ update }) => { savingItems = false; await update(); };
+      }}>
         <input type="hidden" name="items" />
         <button
           type="submit"
-          class="px-6 py-2.5 rounded text-white font-semibold text-sm"
-          style="background:#1a1a6e;"
+          disabled={savingItems}
+          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
+          {#if savingItems}<Spinner />{/if}
           Save Changes
         </button>
       </form>

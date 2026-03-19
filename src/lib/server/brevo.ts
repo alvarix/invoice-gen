@@ -24,6 +24,7 @@ export async function sendInvoiceEmail(
     body: JSON.stringify({
       sender: { name: ownerName, email: env.BREVO_SENDER_EMAIL },
       to: [{ email: to, name: toName }],
+      bcc: [{ email: env.BREVO_SENDER_EMAIL, name: ownerName }],
       subject: `Invoice ${invoiceNumber} from ${ownerName}`,
       htmlContent: `
         <p>Hi ${toName},</p>

@@ -12,7 +12,8 @@
 
 <div class="flex min-h-screen">
   <aside class="w-48 bg-[#1a1a6e] text-white flex flex-col p-4 gap-2">
-    <div class="text-lg font-bold mb-6">Invoices</div>
+    <div class="text-lg font-bold ">Invoice-Gen</div>
+    <div class="font-bold mb-6">by <a href='https://alvarsirlin.dev' target='_blank'>Alfa-Codes</a></div>
     {#each nav as item}
       <a
         href={item.href}
@@ -24,7 +25,7 @@
     {/each}
     <div class="mt-auto">
       <form method="POST" action="/logout">
-        <button type="submit" class="text-sm text-white/60 hover:text-white">Log out</button>
+        <button type="submit" class="text-sm text-white/60 hover:text-white active:text-white/80 transition-colors">Log out</button>
       </form>
     </div>
   </aside>
