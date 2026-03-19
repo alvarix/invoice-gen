@@ -43,12 +43,7 @@ npm run dev
 
 ### Database
 
-Run `supabase/migrations/001_init.sql` in the Supabase SQL editor to create tables. Then add the email/phone columns:
-
-```sql
-ALTER TABLE settings ADD COLUMN IF NOT EXISTS email text;
-ALTER TABLE settings ADD COLUMN IF NOT EXISTS phone text;
-```
+Run the migration files in `supabase/migrations/` in order in the Supabase SQL editor.
 
 ## Development
 
