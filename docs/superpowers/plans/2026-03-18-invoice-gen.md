@@ -1323,7 +1323,7 @@ Reusable component used in both the app detail view and the public page.
     </div>
     <!-- Logo: orange circle with crosshair -->
     <svg width="64" height="64" viewBox="0 0 64 64">
-      <circle cx="32" cy="32" r="32" fill="#e8501a"/>
+      <circle cx="32" cy="32" r="32" fill="#ff3103"/>
       <line x1="32" y1="8" x2="32" y2="56" stroke="white" stroke-width="3"/>
       <line x1="8" y1="32" x2="56" y2="32" stroke="white" stroke-width="3"/>
       <circle cx="32" cy="32" r="10" fill="none" stroke="white" stroke-width="3"/>
@@ -1357,7 +1357,7 @@ Reusable component used in both the app detail view and the public page.
     <thead>
       <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
         <th class="text-left py-2 font-semibold">Description</th>
-        <th class="text-right py-2 font-semibold text-[#e8501a]">Quantity</th>
+        <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
         <th class="text-right py-2 font-semibold"></th>
       </tr>
     </thead>
@@ -1365,7 +1365,7 @@ Reusable component used in both the app detail view and the public page.
       {#each items as item}
         <tr class="border-b border-gray-200">
           <td class="py-2">{item.description}</td>
-          <td class="py-2 text-right text-[#e8501a]">
+          <td class="py-2 text-right text-[#ff3103]">
             {item.duration_rounded ?? '—'}
           </td>
           <td class="py-2 text-right">{formatCurrency(item.amount, client.currency)}</td>
@@ -1376,9 +1376,9 @@ Reusable component used in both the app detail view and the public page.
 
   <!-- Subtotal row -->
   <div class="flex justify-between items-center border-t border-b border-[#1a1a6e] py-2 mt-0 text-sm">
-    <span class="font-semibold text-[#e8501a] uppercase">Subtotal</span>
+    <span class="font-semibold text-[#ff3103] uppercase">Subtotal</span>
     <div class="flex gap-12">
-      <span class="text-[#e8501a]">
+      <span class="text-[#ff3103]">
         {items.filter(i => i.type === 'time').reduce((s, i) => s + (i.hours_rounded ?? 0), 0).toFixed(2)}h
       </span>
       <span>{formatCurrency(invoice.subtotal, client.currency)}</span>
