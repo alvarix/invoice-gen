@@ -99,27 +99,49 @@
     <span class="text-white text-2xl font-bold">{formatCurrency(invoice.total, client.currency)}</span>
   </div>
 
-  <!-- Line items -->
-  <table class="w-full text-sm mb-0">
-    <thead>
-      <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
-        <th class="text-left py-2 font-semibold">Description</th>
-        <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
-        <th class="text-right py-2 font-semibold"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each items as item}
-        <tr class="border-b border-gray-200">
-          <td class="py-2">{item.description}</td>
-          <td class="py-2 text-right text-[#ff3103]">
-            {item.duration_rounded ?? '—'}
-          </td>
-          <td class="py-2 text-right">{formatCurrency(item.amount, client.currency)}</td>
+  <!-- Expenses (if any) -->
+  {#if items.some(i => i.type === 'expense')}
+    <table class="w-full text-sm mb-4">
+      <thead>
+        <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
+          <th class="text-left py-2 font-semibold">Expenses</th>
+          <th class="text-right py-2 font-semibold"></th>
         </tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each items.filter(i => i.type === 'expense') as item}
+          <tr class="border-b border-gray-200">
+            <td class="py-2">{item.description}</td>
+            <td class="py-2 text-right">{formatCurrency(item.amount, client.currency)}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  {/if}
+
+  <!-- Time entries -->
+  {#if items.some(i => i.type === 'time')}
+    <table class="w-full text-sm mb-0">
+      <thead>
+        <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
+          <th class="text-left py-2 font-semibold">Description</th>
+          <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
+          <th class="text-right py-2 font-semibold"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each items.filter(i => i.type === 'time') as item}
+          <tr class="border-b border-gray-200">
+            <td class="py-2">{item.description}</td>
+            <td class="py-2 text-right text-[#ff3103]">
+              {item.duration_rounded ?? '—'}
+            </td>
+            <td class="py-2 text-right">{formatCurrency(item.amount, client.currency)}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  {/if}
 
   <!-- Subtotal row -->
   <div class="flex justify-between items-center border-t border-b border-[#1a1a6e] py-2 mt-0 text-sm">

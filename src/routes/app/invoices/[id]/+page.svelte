@@ -40,11 +40,10 @@
   }
 
   /**
-   * Append a blank expense row for manual entry.
+   * Add a blank expense row at the start (expenses group).
    */
   function addExpense() {
     editItems = [
-      ...editItems,
       {
         id: '',
         invoice_id: data.invoice.id,
@@ -54,10 +53,37 @@
         duration_rounded: null,
         rate: null,
         amount: 0,
+        sort_order: 0,
+      },
+      ...editItems,
+    ];
+  }
+
+  /**
+   * Add a blank time entry row at the end (time group).
+   */
+  function addTimeEntry() {
+    editItems = [
+      ...editItems,
+      {
+        id: '',
+        invoice_id: data.invoice.id,
+        type: 'time',
+        description: '',
+        duration_raw: null,
+        duration_rounded: '0:15',
+        rate: data.invoice.clients?.hourly_rate ?? 0,
+        amount: 0,
         sort_order: editItems.length,
       },
     ];
   }
+
+  /** Expense items (shown first) */
+  let editExpenses = $derived(editItems.filter(i => i.type === 'expense'));
+
+  /** Time items (shown after separator) */
+  let editTimeItems = $derived(editItems.filter(i => i.type === 'time'));
 
   /**
    * Before the save-items form submits, serialize editItems into the hidden input.
@@ -286,58 +312,96 @@
             </tr>
           </thead>
           <tbody>
+            <!-- Expense rows (top) -->
             {#each editItems as item, i (i)}
-              <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <td class="px-3 py-1.5">
-                  <input
-                    type="text"
-                    bind:value={item.description}
-                    class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                  />
-                </td>
-                <td class="px-3 py-1.5" style="color:#ff3103;">
-                  {#if item.type === 'time'}
+              {#if item.type === 'expense'}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 bg-amber-50/50">
+                  <td class="px-3 py-1.5">
+                    <input
+                      type="text"
+                      bind:value={item.description}
+                      placeholder="Expense description"
+                      class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                    />
+                  </td>
+                  <td class="px-3 py-1.5 text-gray-400 text-xs">—</td>
+                  <td class="px-3 py-1.5 text-right">
+                    <input
+                      type="number"
+                      step="0.01"
+                      bind:value={item.amount}
+                      class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                    />
+                  </td>
+                  <td class="px-3 py-1.5 text-center">
+                    <button type="button" onclick={() => deleteRow(i)}
+                      class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
+                      aria-label="Delete row">x</button>
+                  </td>
+                </tr>
+              {/if}
+            {/each}
+
+            <!-- Separator -->
+            {#if editExpenses.length > 0 && editTimeItems.length > 0}
+              <tr><td colspan="4" class="py-1"><hr class="border-[#1a1a6e]/20" /></td></tr>
+            {/if}
+
+            <!-- Time entry rows (bottom) -->
+            {#each editItems as item, i (i)}
+              {#if item.type === 'time'}
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                  <td class="px-3 py-1.5">
+                    <input
+                      type="text"
+                      bind:value={item.description}
+                      class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                    />
+                  </td>
+                  <td class="px-3 py-1.5" style="color:#ff3103;">
                     <input
                       type="text"
                       bind:value={item.duration_rounded}
                       class="w-full border-0 bg-transparent font-mono text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
                     />
-                  {:else}
-                    <span class="text-gray-400 text-xs">—</span>
-                  {/if}
-                </td>
-                <td class="px-3 py-1.5 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    bind:value={item.amount}
-                    class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
-                  />
-                </td>
-                <td class="px-3 py-1.5 text-center">
-                  <button
-                    type="button"
-                    onclick={() => deleteRow(i)}
-                    class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
-                    aria-label="Delete row"
-                  >
-                    x
-                  </button>
-                </td>
-              </tr>
+                  </td>
+                  <td class="px-3 py-1.5 text-right">
+                    <input
+                      type="number"
+                      step="0.01"
+                      bind:value={item.amount}
+                      class="w-full text-right border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                    />
+                  </td>
+                  <td class="px-3 py-1.5 text-center">
+                    <button type="button" onclick={() => deleteRow(i)}
+                      class="text-gray-400 hover:text-red-500 active:text-red-700 font-bold text-base leading-none transition-colors"
+                      aria-label="Delete row">x</button>
+                  </td>
+                </tr>
+              {/if}
             {/each}
           </tbody>
         </table>
       </div>
 
-      <button
-        type="button"
-        onclick={addExpense}
-        class="text-sm font-medium underline transition-colors hover:text-[#b83d13] active:text-[#8a2e0e]"
-        style="color:#ff3103;"
-      >
-        + Add expense row
-      </button>
+      <div class="flex gap-4">
+        <button
+          type="button"
+          onclick={addExpense}
+          class="text-sm font-medium underline transition-colors hover:text-[#b83d13] active:text-[#8a2e0e]"
+          style="color:#ff3103;"
+        >
+          + Add expense
+        </button>
+        <button
+          type="button"
+          onclick={addTimeEntry}
+          class="text-sm font-medium underline transition-colors text-[#1a1a6e] hover:text-[#14145a] active:text-[#0f0f4a]"
+        >
+          + Add time entry
+        </button>
+      </div>
 
       <!-- Edit totals preview -->
       <div class="ml-auto w-64 space-y-1 text-sm text-right pt-2">
