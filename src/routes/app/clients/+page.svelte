@@ -9,6 +9,15 @@
   let editing = $state<any>(null);
   let submitting = $state(false);
   let deleting = $state<string | null>(null);
+  let resetting = $state<string | null>(null);
+
+  /**
+   * Copy the client's portal URL to clipboard.
+   * @param token - the client's portal_token
+   */
+  async function copyPortalUrl(token: string) {
+    await navigator.clipboard.writeText(`${window.location.origin}/portal/${token}`);
+  }
 
   function startEdit(client: any) {
     editing = client;
@@ -100,6 +109,7 @@
       <th class="pb-2">Rate</th>
       <th class="pb-2">Last Invoice</th>
       <th class="pb-2">Status</th>
+      <th class="pb-2">Portal</th>
       <th class="pb-2"></th>
     </tr>
   </thead>
@@ -117,6 +127,28 @@
             <span class="capitalize text-xs px-2 py-1 rounded bg-gray-100">
               {client.latest_invoice.status}
             </span>
+          {/if}
+        </td>
+        <!-- Portal link + reset -->
+        <td class="py-3">
+          {#if client.portal_token}
+            <div class="flex items-center gap-1">
+              <button type="button" onclick={() => copyPortalUrl(client.portal_token)}
+                class="text-xs text-[#1a1a6e] hover:underline transition-colors">Copy link</button>
+              <form method="POST" action="?/resetPortalToken"
+                use:enhance={() => {
+                  resetting = client.id;
+                  return async ({ update }) => { resetting = null; await update(); };
+                }}
+                onsubmit={(e) => { if (!confirm('Reset portal link? The old URL will stop working.')) e.preventDefault(); }}>
+                <input type="hidden" name="id" value={client.id} />
+                <button type="submit" disabled={resetting === client.id}
+                  class="text-xs text-gray-400 hover:text-gray-600 hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1">
+                  {#if resetting === client.id}<Spinner />{/if}
+                  Reset
+                </button>
+              </form>
+            </div>
           {/if}
         </td>
         <td class="py-3 flex gap-2 justify-end">

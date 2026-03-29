@@ -2,6 +2,7 @@ import { supabase } from '$lib/server/supabase';
 import { sendInvoiceEmail } from '$lib/server/brevo';
 import { env } from '$env/dynamic/private';
 import { error, fail } from '@sveltejs/kit';
+import { marked } from 'marked';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -13,8 +14,9 @@ export const load: PageServerLoad = async ({ params }) => {
     .from('line_items').select('*').eq('invoice_id', params.id).order('sort_order');
 
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
+  const notesHtml = invoice.notes ? await marked(invoice.notes) : null;
 
-  return { invoice, items: items ?? [], settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null } };
+  return { invoice, items: items ?? [], settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null }, notesHtml };
 };
 
 export const actions: Actions = {
@@ -73,6 +75,17 @@ export const actions: Actions = {
     const { error: updateError } = await supabase
       .from('invoices').update({ invoice_number }).eq('id', params.id);
     if (updateError) return fail(500, { error: 'Failed to update invoice number' });
+  },
+
+  /**
+   * Save optional markdown notes on a draft invoice.
+   */
+  updateNotes: async ({ request, params }) => {
+    const data = await request.formData();
+    const notes = (data.get('notes') as string) || null;
+    const { error: updateError } = await supabase
+      .from('invoices').update({ notes }).eq('id', params.id);
+    if (updateError) return fail(500, { error: 'Failed to save notes' });
   },
 
   /**

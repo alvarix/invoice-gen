@@ -2,11 +2,13 @@
   import type { Invoice, LineItem, Client, Settings } from '$lib/types';
   import { formatCurrency, formatDate } from '$lib/utils';
 
-  let { invoice, items, client, settings }: {
+  let { invoice, items, client, settings, notesHtml = null }: {
     invoice: Invoice;
     items: LineItem[];
     client: Client;
     settings: Settings;
+    /** Pre-rendered markdown HTML for optional invoice notes */
+    notesHtml?: string | null;
   } = $props();
 
   /**
@@ -169,5 +171,14 @@
       <div class="text-3xl font-bold">{formatCurrency(invoice.total, client.currency)}</div>
     </div>
   </div>
+
+  <!-- Notes (optional markdown) -->
+  {#if notesHtml}
+    <div class="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-700
+      [&_h1]:text-[#1a1a6e] [&_h2]:text-[#1a1a6e] [&_h3]:text-[#1a1a6e] [&_a]:text-[#ff3103]
+      prose prose-sm max-w-none">
+      {@html notesHtml}
+    </div>
+  {/if}
 
 </div>

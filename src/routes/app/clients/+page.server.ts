@@ -57,5 +57,18 @@ export const actions: Actions = {
     // Cascades to invoices and line_items via FK constraint
     const { error } = await supabase.from('clients').delete().eq('id', id);
     if (error) return fail(500, { error: error.message });
+  },
+
+  /**
+   * Regenerate portal_token for a client, invalidating the old portal URL.
+   */
+  resetPortalToken: async ({ request }) => {
+    const data = await request.formData();
+    const id = data.get('id') as string;
+    const { error } = await supabase
+      .from('clients')
+      .update({ portal_token: crypto.randomUUID() })
+      .eq('id', id);
+    if (error) return fail(500, { error: error.message });
   }
 };

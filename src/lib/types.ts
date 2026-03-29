@@ -9,6 +9,7 @@ export interface Client {
   currency: string;
   tax_rate: number;
   invoice_seq: number;
+  portal_token: string | null;
   created_at: string;
 }
 
@@ -25,6 +26,7 @@ export interface Invoice {
   tax_amount: number;
   total: number;
   public_token: string;
+  notes: string | null;
   created_at: string;
 }
 
@@ -38,6 +40,21 @@ export interface LineItem {
   rate: number | null;
   amount: number;
   sort_order: number;
+}
+
+export interface Agreement {
+  id: string;
+  client_id: string;
+  title: string;
+  content: string | null;
+  status: 'draft' | 'sent' | 'accepted';
+  public_token: string;
+  sent_at: string | null;
+  accepted_at: string | null;
+  accepted_ip: string | null;
+  pdf_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Settings {

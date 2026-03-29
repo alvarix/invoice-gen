@@ -27,6 +27,7 @@
   let statusSubmitting = $state(false);
   let savingItems = $state(false);
   let sending = $state(false);
+  let savingNotes = $state(false);
 
   /** Controls the email confirmation modal */
   let showEmailModal = $state(false);
@@ -487,7 +488,30 @@
     </section>
   {/if}
 
+  <!-- Notes (draft only) -->
+  {#if isDraft}
+    <section class="space-y-2">
+      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Notes</h2>
+      <form method="POST" action="?/updateNotes" use:enhance={() => {
+        savingNotes = true;
+        return async ({ update }) => { savingNotes = false; await update(); };
+      }} class="space-y-2">
+        <textarea
+          name="notes"
+          rows="4"
+          placeholder="Optional notes or memo (Markdown supported). Rendered below the invoice totals."
+          class="w-full border rounded px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400 resize-y"
+        >{data.invoice.notes ?? ''}</textarea>
+        <button type="submit" disabled={savingNotes}
+          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+          {#if savingNotes}<Spinner />{/if}
+          Save Notes
+        </button>
+      </form>
+    </section>
+  {/if}
+
   <!-- Invoice preview -->
-  <InvoiceView invoice={data.invoice} items={data.items} client={data.invoice.clients} settings={data.settings} />
+  <InvoiceView invoice={data.invoice} items={data.items} client={data.invoice.clients} settings={data.settings} notesHtml={data.notesHtml} />
 
 </div>

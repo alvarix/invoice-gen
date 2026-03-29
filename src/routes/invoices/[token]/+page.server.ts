@@ -1,5 +1,6 @@
 import { supabase } from '$lib/server/supabase';
 import { error } from '@sveltejs/kit';
+import { marked } from 'marked';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -12,5 +13,13 @@ export const load: PageServerLoad = async ({ params }) => {
 
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
 
-  return { invoice, client: invoice.clients, items: items ?? [], settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null } };
+  const notesHtml = invoice.notes ? await marked(invoice.notes) : null;
+
+  return {
+    invoice,
+    client: invoice.clients,
+    items: items ?? [],
+    settings: settings ?? { id: 1, owner_name: null, address: null, zelle: null, logo_url: null },
+    notesHtml,
+  };
 };

@@ -8,7 +8,7 @@
 </svelte:head>
 
 <div class="print-area">
-  <InvoiceView invoice={data.invoice} items={data.items} client={data.client} settings={data.settings} />
+  <InvoiceView invoice={data.invoice} items={data.items} client={data.client} settings={data.settings} notesHtml={data.notesHtml} />
 </div>
 
 <div class="flex justify-center py-4 print:hidden">
