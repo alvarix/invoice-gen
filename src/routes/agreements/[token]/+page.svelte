@@ -11,7 +11,10 @@
 
   const isSent = $derived(data.agreement.status === 'sent');
   const isAccepted = $derived(data.agreement.status === 'accepted');
+
 </script>
+
+<svelte:window onkeydown={(e) => { if (e.key === 'Escape') showConfirm = false; }} />
 
 <svelte:head>
   <title>{data.agreement.title}</title>

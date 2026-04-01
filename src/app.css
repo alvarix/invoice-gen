@@ -6,23 +6,21 @@
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; left: 0; top: 0; width: 100%; }
 
-  /* Small header that repeats on every printed page (position:fixed in print) */
-  .print-page-header {
-    display: block !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 8px 40px;
-    font-size: 10px;
-    color: #1a1a6e;
-    border-bottom: 1px solid #ddd;
-    background: #fff;
-  }
-
-  /* Push first page content below the fixed header */
-  .print-area { padding-top: 36px; }
+  /* Hide the old fixed header div — replaced by @page margin box */
+  .print-page-header { display: none !important; }
 
   /* Hide Print/PDF button */
   .print\\:hidden { display: none !important; }
+}
+
+@page {
+  margin-top: 18mm;
+
+  /* Page number — static, always works */
+  @top-right {
+    content: "Page " counter(page);
+    font-size: 10px;
+    color: #1a1a6e;
+    padding-bottom: 4px;
+  }
 }

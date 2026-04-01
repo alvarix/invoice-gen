@@ -6,8 +6,14 @@
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
+  /** Today's date in YYYY-MM-DD for the invoice date default */
+  const today = new Date().toISOString().slice(0, 10);
+
+  /** 30 days from today for the due date default */
+  const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
   /** Currently selected input mode for Toggl data */
-  let inputMode = $state<'paste' | 'csv'>('paste');
+  let inputMode = $state<'paste' | 'csv' | 'manual'>('paste');
 
   /** ID of the selected client */
   let selectedClientId = $state<string>(data.clients[0]?.id ?? '');
@@ -195,9 +201,23 @@
       >
         CSV
       </button>
+      <button
+        type="button"
+        onclick={() => (inputMode = 'manual')}
+        class="px-4 py-2 rounded font-medium text-sm border transition-colors"
+        class:bg-[#1a1a6e]={inputMode === 'manual'}
+        class:text-white={inputMode === 'manual'}
+        class:border-[#1a1a6e]={true}
+        class:bg-white={inputMode !== 'manual'}
+        class:text-[#1a1a6e]={inputMode !== 'manual'}
+        class:hover:bg-[#14145a]={inputMode === 'manual'}
+        class:hover:bg-gray-50={inputMode !== 'manual'}
+      >
+        Manual
+      </button>
     </div>
 
-    {#if inputMode === 'paste'}
+    {#if inputMode === 'paste' || inputMode === 'csv'}{#if inputMode === 'paste'}
       <form method="POST" action="?/parseToggl" class="space-y-3" use:enhance={() => {
         parsing = true;
         return async ({ update }) => { parsing = false; await update(); };
@@ -247,11 +267,11 @@
           Parse
         </button>
       </form>
-    {/if}
+    {/if}{/if}
   </section>
 
-  <!-- Line items table (shown after parse) -->
-  {#if items.length > 0}
+  <!-- Line items table: shown after parse, or immediately in manual mode -->
+  {#if items.length > 0 || inputMode === 'manual'}
     <section class="space-y-3">
       <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Line Items</h2>
       <!-- Expenses table -->
@@ -415,6 +435,7 @@
               name="invoice_date"
               type="date"
               required
+              value={today}
               class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
@@ -426,6 +447,7 @@
               id="due-date"
               name="due_date"
               type="date"
+              value={in30Days}
               class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>

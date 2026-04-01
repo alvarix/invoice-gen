@@ -23,15 +23,10 @@
   }
 </script>
 
-<!-- Repeating header for printed pages 2+ (hidden on screen) -->
-<div class="print-page-header hidden" style="display:none;">
-  <span class="font-semibold">{invoice.invoice_number}</span>
-  <span class="mx-2">|</span>
-  <span>{client.name}</span>
-  {#if client.company}<span class="mx-1">—</span><span>{client.company}</span>{/if}
-  <span class="mx-2">|</span>
-  <span class="font-semibold">{formatCurrency(invoice.total, client.currency)}</span>
-</div>
+<!-- Bake header string directly into @page content — var() not supported in margin boxes -->
+<svelte:head>
+  {@html `<style>@page { @top-center { content: "${settings.owner_name ?? 'Alvar Sirlin'} | Invoice | ${formatDate(invoice.invoice_date)}"; font-size: 10px; color: #1a1a6e; padding-bottom: 4px; } }</style>`}
+</svelte:head>
 
 <div class="max-w-3xl mx-auto p-10 font-sans text-[#1a1a6e]">
 
@@ -42,7 +37,7 @@
       <h2 class="text-xl mb-4"><a class='text-[#ff3103]' href='https://alvarsirlin.dev' target='_blank'>alvarsirlin.dev</a></h2>
       <div class="text-sm space-y-1">
         <div><span class="font-bold">Invoice ID:</span> #{invoice.invoice_number}</div>
-        <div><span class="font-bold">Invoice Date:</span> {formatDate(invoice.invoice_date)}</div>
+        <div>{settings.owner_name ?? 'Alvar Sirlin'} | Invoice | {formatDate(invoice.invoice_date)}</div>
         {#if invoice.due_date}
           <div><span class="font-bold">Due date:</span> {formatDate(invoice.due_date)}</div>
         {/if}
