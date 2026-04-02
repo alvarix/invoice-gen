@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ params }) => {
   const [{ data: invoices }, { data: agreements }, { data: settings }] = await Promise.all([
     supabase
       .from('invoices')
-      .select('id, invoice_number, invoice_date, status, total, public_token, currency')
+      .select('id, invoice_number, invoice_date, status, total, public_token')
       .eq('client_id', client.id)
       .neq('status', 'draft')
       .order('invoice_date', { ascending: false }),

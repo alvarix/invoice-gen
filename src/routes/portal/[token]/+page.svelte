@@ -58,7 +58,7 @@
               <td class="py-3">
                 <span class="capitalize text-xs px-2 py-1 rounded {badgeClass(inv.status)}">{inv.status}</span>
               </td>
-              <td class="py-3 text-right">{formatCurrency(inv.total, inv.currency)}</td>
+              <td class="py-3 text-right">{formatCurrency(inv.total, data.client.currency)}</td>
               <td class="py-3 text-right">
                 <a href="/invoices/{inv.public_token}"
                   class="text-[#1a1a6e] hover:underline text-xs">View</a>
