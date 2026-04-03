@@ -78,6 +78,41 @@ export const actions: Actions = {
   },
 
   /**
+   * Save service agreement debit hours and recalculate totals.
+   * debit_amount = debit_hours × client hourly_rate
+   * Tax is applied to (subtotal - debit_amount).
+   */
+  updateDebit: async ({ request, params }) => {
+    const data = await request.formData();
+    const debit_hours = Math.max(0, Number(data.get('debit_hours')) || 0);
+
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('subtotal, tax_rate, client_id')
+      .eq('id', params.id)
+      .single();
+    if (!invoice) return fail(404, { error: 'Invoice not found' });
+
+    const { data: client } = await supabase
+      .from('clients')
+      .select('hourly_rate')
+      .eq('id', invoice.client_id)
+      .single();
+    if (!client) return fail(404, { error: 'Client not found' });
+
+    const debit_amount = Math.round(debit_hours * client.hourly_rate * 100) / 100;
+    const taxable = Math.max(0, invoice.subtotal - debit_amount);
+    const tax_amount = Math.round(taxable * invoice.tax_rate * 100) / 100;
+    const total = taxable + tax_amount;
+
+    const { error: err } = await supabase
+      .from('invoices')
+      .update({ debit_hours, debit_amount, tax_amount, total })
+      .eq('id', params.id);
+    if (err) return fail(500, { error: err.message });
+  },
+
+  /**
    * Save optional markdown notes on a draft invoice.
    */
   updateNotes: async ({ request, params }) => {

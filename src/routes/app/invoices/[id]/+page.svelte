@@ -28,6 +28,8 @@
   let savingItems = $state(false);
   let sending = $state(false);
   let savingNotes = $state(false);
+  let savingDebit = $state(false);
+  let debitHours = $state(data.invoice.debit_hours ?? 0);
 
   /** Controls the email confirmation modal */
   let showEmailModal = $state(false);
@@ -483,6 +485,39 @@
         >
           {#if savingItems}<Spinner />{/if}
           Save Changes
+        </button>
+      </form>
+    </section>
+  {/if}
+
+  <!-- Service agreement debit -->
+  {#if isDraft}
+    <section class="space-y-2">
+      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Service Agreement Debit</h2>
+      <form method="POST" action="?/updateDebit" use:enhance={() => {
+        savingDebit = true;
+        return async ({ update }) => { savingDebit = false; await update(); };
+      }} class="flex items-end gap-4">
+        <label class="flex flex-col gap-1 text-sm">
+          Hours to deduct
+          <input
+            type="number"
+            name="debit_hours"
+            min="0"
+            step="0.25"
+            bind:value={debitHours}
+            class="border rounded px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </label>
+        {#if debitHours > 0}
+          <span class="text-sm text-gray-500 pb-2">
+            = {formatCurrency(data.invoice.debit_amount, data.invoice.clients.currency)} deducted before tax
+          </span>
+        {/if}
+        <button type="submit" disabled={savingDebit}
+          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 mb-0.5">
+          {#if savingDebit}<Spinner />{/if}
+          Apply
         </button>
       </form>
     </section>

@@ -27,6 +27,8 @@ export interface Invoice {
   total: number;
   public_token: string;
   notes: string | null;
+  debit_hours: number;
+  debit_amount: number;
   created_at: string;
 }
 

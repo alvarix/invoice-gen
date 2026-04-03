@@ -151,6 +151,17 @@
     </div>
   </div>
 
+  <!-- Service agreement debit (only if debit_hours > 0) -->
+  {#if invoice.debit_hours > 0}
+    <div class="flex justify-between items-center border-b border-gray-200 py-2 text-sm">
+      <span class="text-gray-600">Service agreement debit</span>
+      <div class="flex gap-12">
+        <span class="text-gray-500">{invoice.debit_hours}h</span>
+        <span class="text-gray-600">−{formatCurrency(invoice.debit_amount, client.currency)}</span>
+      </div>
+    </div>
+  {/if}
+
   <!-- Tax row (only if tax_rate > 0) -->
   {#if invoice.tax_rate > 0}
     <div class="flex justify-end gap-12 text-sm py-2 border-b border-gray-200">

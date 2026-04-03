@@ -12,14 +12,21 @@ export function generateInvoiceNumber(slug: string, seq: number): string {
 }
 
 /**
- * Calculate invoice totals from line items and tax rate.
+ * Calculate invoice totals from line items, tax rate, and optional service debit.
+ * Debit is subtracted from subtotal before tax is applied.
  * @param items - array of line items with amount set
  * @param taxRate - decimal tax rate e.g. 0.15 for 15%
+ * @param debitAmount - dollar amount to deduct before tax (default 0)
  * @returns subtotal, tax_amount, total
  */
-export function calculateTotals(items: Pick<LineItem, 'amount'>[], taxRate: number) {
+export function calculateTotals(
+  items: Pick<LineItem, 'amount'>[],
+  taxRate: number,
+  debitAmount = 0
+) {
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const tax_amount = Math.round(subtotal * taxRate * 100) / 100;
-  const total = subtotal + tax_amount;
+  const taxable = Math.max(0, subtotal - debitAmount);
+  const tax_amount = Math.round(taxable * taxRate * 100) / 100;
+  const total = taxable + tax_amount;
   return { subtotal, tax_amount, total };
 }
