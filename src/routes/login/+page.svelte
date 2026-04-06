@@ -25,7 +25,7 @@
       required
     />
     <button type="submit" disabled={submitting}
-      class="bg-[#1a1a6e] text-white rounded px-4 py-2 transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
+      class="bg-[#337638] text-white rounded px-4 py-2 transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
       {#if submitting}<Spinner />{/if}
       Log in
     </button>

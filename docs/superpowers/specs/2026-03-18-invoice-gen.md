@@ -148,7 +148,7 @@ CSV format (Toggl export):
 ## Invoice Design (matches PDF)
 
 **Colors:**
-- Primary text: dark navy `#1a1a6e` (approx)
+- Primary text: dark navy `#337638` (approx)
 - Accent: orange-red (SUBTOTAL label, QUANTITY values, logo)
 
 **Layout:**

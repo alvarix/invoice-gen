@@ -25,10 +25,10 @@
 
 <!-- Bake header string directly into @page content — var() not supported in margin boxes -->
 <svelte:head>
-  {@html `<style>@page { @top-center { content: "${settings.owner_name ?? 'Alvar Sirlin'} | Invoice | ${formatDate(invoice.invoice_date)}"; font-size: 10px; color: #1a1a6e; padding-bottom: 4px; } }</style>`}
+  {@html `<style>@page { @top-center { content: "${settings.owner_name ?? 'Alvar Sirlin'} | Invoice | ${formatDate(invoice.invoice_date)}"; font-size: 10px; color: #337638; padding-bottom: 4px; } }</style>`}
 </svelte:head>
 
-<div class="max-w-3xl mx-auto p-10 font-sans text-[#1a1a6e]">
+<div class="max-w-3xl mx-auto p-10 font-sans text-[#337638]">
 
   <!-- Header row -->
   <div class="flex justify-between items-start mb-8">
@@ -91,7 +91,7 @@
   </div>
 
   <!-- Total due — always visible on page 1 -->
-  <div class="flex justify-between items-center rounded px-4 py-3 mb-6" style="background:#1a1a6e;">
+  <div class="flex justify-between items-center rounded px-4 py-3 mb-6" style="background:#337638;">
     <span class="text-white text-sm font-semibold uppercase tracking-wide">Total Due</span>
     <span class="text-white text-2xl font-bold">{formatCurrency(invoice.total, client.currency)}</span>
   </div>
@@ -100,7 +100,7 @@
   {#if items.some(i => i.type === 'expense')}
     <table class="w-full text-sm mb-4">
       <thead>
-        <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
+        <tr class="border-t border-b border-[#337638] uppercase text-xs">
           <th class="text-left py-2 font-semibold">Expenses</th>
           <th class="text-right py-2 font-semibold"></th>
         </tr>
@@ -120,7 +120,7 @@
   {#if items.some(i => i.type === 'time')}
     <table class="w-full text-sm mb-0">
       <thead>
-        <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
+        <tr class="border-t border-b border-[#337638] uppercase text-xs">
           <th class="text-left py-2 font-semibold">Description</th>
           <th class="text-left py-2 font-semibold text-gray-400 w-24">Date</th>
           <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
@@ -143,7 +143,7 @@
   {/if}
 
   <!-- Subtotal row -->
-  <div class="flex justify-between items-center border-t border-b border-[#1a1a6e] py-2 mt-0 text-sm">
+  <div class="flex justify-between items-center border-t border-b border-[#337638] py-2 mt-0 text-sm">
     <span class="font-semibold text-[#ff3103] uppercase">Subtotal</span>
     <div class="flex gap-12">
       <span class="text-[#ff3103]">
@@ -175,7 +175,7 @@
   <!-- Total -->
   <div class="flex justify-end mt-4">
     <div class="text-right">
-      <div class="text-xs uppercase tracking-wide text-[#1a1a6e] mb-1">Total</div>
+      <div class="text-xs uppercase tracking-wide text-[#337638] mb-1">Total</div>
       <div class="text-3xl font-bold">{formatCurrency(invoice.total, client.currency)}</div>
     </div>
   </div>
@@ -183,7 +183,7 @@
   <!-- Notes (optional markdown) -->
   {#if notesHtml}
     <div class="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-700
-      [&_h1]:text-[#1a1a6e] [&_h2]:text-[#1a1a6e] [&_h3]:text-[#1a1a6e] [&_a]:text-[#ff3103]
+      [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638] [&_a]:text-[#ff3103]
       prose prose-sm max-w-none">
       {@html notesHtml}
     </div>

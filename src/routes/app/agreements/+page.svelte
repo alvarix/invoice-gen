@@ -14,9 +14,9 @@
 </script>
 
 <div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-[#1a1a6e]">Agreements</h1>
+  <h1 class="text-2xl font-bold text-[#337638]">Agreements</h1>
   <a href="/app/agreements/new"
-    class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
+    class="bg-[#337638] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
     New Agreement
   </a>
 </div>
@@ -24,12 +24,12 @@
 <!-- Status filter -->
 <div class="flex gap-2 mb-6">
   <a href="/app/agreements"
-    class="px-3 py-1 rounded text-sm transition-colors {!data.statusFilter ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+    class="px-3 py-1 rounded text-sm transition-colors {!data.statusFilter ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
     All
   </a>
   {#each statuses as s}
     <a href="/app/agreements?status={s}"
-      class="px-3 py-1 rounded text-sm capitalize transition-colors {data.statusFilter === s ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+      class="px-3 py-1 rounded text-sm capitalize transition-colors {data.statusFilter === s ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
       {s}
     </a>
   {/each}
@@ -40,7 +40,7 @@
 {:else}
   <table class="w-full text-sm">
     <thead>
-      <tr class="text-left border-b text-[#1a1a6e] uppercase text-xs">
+      <tr class="text-left border-b text-[#337638] uppercase text-xs">
         <th class="pb-2">Title</th>
         <th class="pb-2">Client</th>
         <th class="pb-2">Status</th>
@@ -59,7 +59,7 @@
           <td class="py-3 text-gray-500">{a.created_at?.slice(0, 10) ?? '—'}</td>
           <td class="py-3 text-right">
             <a href="/app/agreements/{a.id}"
-              class="text-[#1a1a6e] hover:underline text-xs">View</a>
+              class="text-[#337638] hover:underline text-xs">View</a>
           </td>
         </tr>
       {/each}

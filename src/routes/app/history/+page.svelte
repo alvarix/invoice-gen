@@ -25,7 +25,7 @@
 </script>
 
 <div class="max-w-5xl mx-auto space-y-6">
-  <h1 class="text-2xl font-bold text-[#1a1a6e]">Invoice History</h1>
+  <h1 class="text-2xl font-bold text-[#337638]">Invoice History</h1>
 
   <!-- Filters — GET form so params appear in URL and trigger server reload -->
   <form method="GET" class="flex gap-4 items-end">
@@ -35,7 +35,7 @@
         id="client-filter"
         name="client"
         value={data.activeClient}
-        class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a1a6e]"
+        class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337638]"
       >
         <option value="">All clients</option>
         {#each data.clients as client (client.id)}
@@ -50,7 +50,7 @@
         id="status-filter"
         name="status"
         value={data.activeStatus}
-        class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a1a6e]"
+        class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337638]"
       >
         <option value="">All</option>
         <option value="draft">Draft</option>
@@ -61,7 +61,7 @@
 
     <button
       type="submit"
-      class="px-4 py-2 rounded text-white text-sm font-medium bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] transition-colors"
+      class="px-4 py-2 rounded text-white text-sm font-medium bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a] transition-colors"
     >
       Filter
     </button>
@@ -74,7 +74,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm border-collapse">
         <thead>
-          <tr class="text-left text-xs uppercase tracking-wide bg-[#1a1a6e] text-white">
+          <tr class="text-left text-xs uppercase tracking-wide bg-[#337638] text-white">
             <th class="px-4 py-3 font-semibold">Invoice #</th>
             <th class="px-4 py-3 font-semibold">Client</th>
             <th class="px-4 py-3 font-semibold">Date</th>
@@ -89,7 +89,7 @@
               <td class="px-4 py-3">
                 <a
                   href="/app/invoices/{invoice.id}"
-                  class="font-medium text-[#1a1a6e] hover:underline"
+                  class="font-medium text-[#337638] hover:underline"
                 >
                   {invoice.invoice_number}
                 </a>

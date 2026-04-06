@@ -664,7 +664,7 @@ git commit -m "feat: add server utilities, types, toggl parser, invoice helpers"
       class="border rounded px-3 py-2"
       required
     />
-    <button type="submit" class="bg-[#1a1a6e] text-white rounded px-4 py-2">
+    <button type="submit" class="bg-[#337638] text-white rounded px-4 py-2">
       Log in
     </button>
   </form>
@@ -758,7 +758,7 @@ git commit -m "feat: add password auth, session cookie, app route guard"
 </script>
 
 <div class="flex min-h-screen">
-  <aside class="w-48 bg-[#1a1a6e] text-white flex flex-col p-4 gap-2">
+  <aside class="w-48 bg-[#337638] text-white flex flex-col p-4 gap-2">
     <div class="text-lg font-bold mb-6">Invoices</div>
     {#each nav as item}
       <a
@@ -888,9 +888,9 @@ export const actions: Actions = {
 </script>
 
 <div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-[#1a1a6e]">Clients</h1>
+  <h1 class="text-2xl font-bold text-[#337638]">Clients</h1>
   <button onclick={() => { editing = null; showForm = true; }}
-    class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm">
+    class="bg-[#337638] text-white px-4 py-2 rounded text-sm">
     Add Client
   </button>
 </div>
@@ -944,7 +944,7 @@ export const actions: Actions = {
         value={editing ? editing.tax_rate * 100 : 0} class="border rounded px-3 py-2" />
     </label>
     <div class="col-span-2 flex gap-3">
-      <button type="submit" class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm">
+      <button type="submit" class="bg-[#337638] text-white px-4 py-2 rounded text-sm">
         {editing ? 'Save' : 'Create'}
       </button>
       <button type="button" onclick={cancelForm}
@@ -955,7 +955,7 @@ export const actions: Actions = {
 
 <table class="w-full text-sm">
   <thead>
-    <tr class="text-left border-b text-[#1a1a6e] uppercase text-xs">
+    <tr class="text-left border-b text-[#337638] uppercase text-xs">
       <th class="pb-2">Name</th>
       <th class="pb-2">Company</th>
       <th class="pb-2">Rate</th>
@@ -982,7 +982,7 @@ export const actions: Actions = {
         </td>
         <td class="py-3 flex gap-2 justify-end">
           <button onclick={() => startEdit(client)}
-            class="text-[#1a1a6e] hover:underline text-xs">Edit</button>
+            class="text-[#337638] hover:underline text-xs">Edit</button>
           <form method="POST" action="?/delete"
             onsubmit="return confirm('Delete client and all invoices?')">
             <input type="hidden" name="id" value={client.id} />
@@ -1307,7 +1307,7 @@ Reusable component used in both the app detail view and the public page.
   } = $props();
 </script>
 
-<div class="max-w-3xl mx-auto p-10 font-sans text-[#1a1a6e]">
+<div class="max-w-3xl mx-auto p-10 font-sans text-[#337638]">
 
   <!-- Header row -->
   <div class="flex justify-between items-start mb-8">
@@ -1355,7 +1355,7 @@ Reusable component used in both the app detail view and the public page.
   <!-- Line items -->
   <table class="w-full text-sm mb-0">
     <thead>
-      <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
+      <tr class="border-t border-b border-[#337638] uppercase text-xs">
         <th class="text-left py-2 font-semibold">Description</th>
         <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
         <th class="text-right py-2 font-semibold"></th>
@@ -1375,7 +1375,7 @@ Reusable component used in both the app detail view and the public page.
   </table>
 
   <!-- Subtotal row -->
-  <div class="flex justify-between items-center border-t border-b border-[#1a1a6e] py-2 mt-0 text-sm">
+  <div class="flex justify-between items-center border-t border-b border-[#337638] py-2 mt-0 text-sm">
     <span class="font-semibold text-[#ff3103] uppercase">Subtotal</span>
     <div class="flex gap-12">
       <span class="text-[#ff3103]">
@@ -1396,7 +1396,7 @@ Reusable component used in both the app detail view and the public page.
   <!-- Total -->
   <div class="flex justify-end mt-4">
     <div class="text-right">
-      <div class="text-xs uppercase tracking-wide text-[#1a1a6e] mb-1">Total</div>
+      <div class="text-xs uppercase tracking-wide text-[#337638] mb-1">Total</div>
       <div class="text-3xl font-bold">{formatCurrency(invoice.total, client.currency)}</div>
     </div>
   </div>

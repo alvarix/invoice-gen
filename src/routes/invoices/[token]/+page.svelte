@@ -14,7 +14,7 @@
 <div class="flex justify-center py-4 print:hidden">
   <button
     onclick={() => window.print()}
-    class="px-5 py-2 rounded text-white text-sm font-medium transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a]"
+    class="px-5 py-2 rounded text-white text-sm font-medium transition-colors bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a]"
   >
     Print / Save PDF
   </button>

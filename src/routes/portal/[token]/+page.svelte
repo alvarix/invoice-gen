@@ -16,7 +16,7 @@
   <title>Portal — {data.client.name}</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-[#1a1a6e]">
+<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-[#337638]">
 
   <!-- Header -->
   <div class="flex justify-between items-start mb-10">
@@ -28,7 +28,7 @@
     </div>
     {#if data.settings?.owner_name}
       <div class="text-right text-sm text-gray-500">
-        <div class="font-medium text-[#1a1a6e]">{data.settings.owner_name}</div>
+        <div class="font-medium text-[#337638]">{data.settings.owner_name}</div>
         {#if data.settings.email}<div>{data.settings.email}</div>{/if}
       </div>
     {/if}
@@ -61,7 +61,7 @@
               <td class="py-3 text-right">{formatCurrency(inv.total, data.client.currency)}</td>
               <td class="py-3 text-right">
                 <a href="/invoices/{inv.public_token}"
-                  class="text-[#1a1a6e] hover:underline text-xs">View</a>
+                  class="text-[#337638] hover:underline text-xs">View</a>
               </td>
             </tr>
           {/each}
@@ -97,7 +97,7 @@
               </td>
               <td class="py-3 text-right">
                 <a href="/agreements/{ag.public_token}"
-                  class="text-[#1a1a6e] hover:underline text-xs">View</a>
+                  class="text-[#337638] hover:underline text-xs">View</a>
               </td>
             </tr>
           {/each}

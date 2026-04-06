@@ -12,9 +12,10 @@
 </script>
 
 <div class="flex min-h-screen">
-  <aside class="w-48 bg-[#1a1a6e] text-white flex flex-col p-4 gap-2">
-    <div class="text-lg font-bold ">Invoice-Gen</div>
-    <div class="font-bold mb-6">by <a href='https://alvarsirlin.dev' target='_blank'>Alfa-Codes</a></div>
+  <aside class="w-48 bg-[#337638] text-white flex flex-col p-4 gap-2">
+
+    <div class="text-lg font-bold ">Client Portal</div>
+    <div class="font-bold mb-6"><a href='https://alvarsirlin.dev' target='_blank'>AlvarSirlin.dev</a></div>
     {#each nav as item}
       <a
         href={item.href}

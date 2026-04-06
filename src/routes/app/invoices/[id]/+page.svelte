@@ -180,7 +180,7 @@
         value={data.invoice.invoice_number}
         onblur={(e) => (e.currentTarget.form as HTMLFormElement).requestSubmit()}
         class="text-2xl font-bold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-orange-400 focus:outline-none px-1"
-        style="color: #1a1a6e;"
+        style="color: #337638;"
         aria-label="Invoice number"
       />
     </form>
@@ -195,8 +195,8 @@
     <button
       type="button"
       onclick={copyLink}
-      class="ml-auto px-4 py-1.5 rounded border text-sm font-medium transition-colors hover:bg-[#1a1a6e] hover:text-white active:bg-[#14145a] active:text-white"
-      style="border-color:#1a1a6e; color:{copied ? '#fff' : '#1a1a6e'}; background:{copied ? '#16a34a' : 'transparent'};"
+      class="ml-auto px-4 py-1.5 rounded border text-sm font-medium transition-colors hover:bg-[#337638] hover:text-white active:bg-[#14145a] active:text-white"
+      style="border-color:#337638; color:{copied ? '#fff' : '#337638'}; background:{copied ? '#16a34a' : 'transparent'};"
     >
       {copied ? 'Copied' : 'Copy Link'}
     </button>
@@ -253,7 +253,7 @@
     <a
       href="/invoices/{data.invoice.public_token}"
       target="_blank"
-      class="px-4 py-1.5 rounded border text-sm font-medium transition-colors border-[#1a1a6e] text-[#1a1a6e] hover:bg-[#1a1a6e] hover:text-white active:bg-[#14145a]"
+      class="px-4 py-1.5 rounded border text-sm font-medium transition-colors border-[#337638] text-[#337638] hover:bg-[#337638] hover:text-white active:bg-[#14145a]"
     >
       Print / PDF
     </a>
@@ -274,7 +274,7 @@
       onkeydown={(e) => { if (e.key === 'Escape') showEmailModal = false; }}
     >
       <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6 space-y-4">
-        <h2 class="text-lg font-bold" style="color: #1a1a6e;">Send Invoice Email</h2>
+        <h2 class="text-lg font-bold" style="color: #337638;">Send Invoice Email</h2>
 
         <div class="text-sm space-y-2 border rounded p-4 bg-gray-50">
           <div>
@@ -339,13 +339,13 @@
   <!-- Editable line items (draft only) -->
   {#if isDraft}
     <section class="space-y-3">
-      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Edit Line Items</h2>
+      <h2 class="text-lg font-semibold" style="color: #337638;">Edit Line Items</h2>
       <!-- Expenses table -->
       {#if editExpenses.length > 0}
         <div class="overflow-x-auto">
           <table class="w-full text-sm border-collapse">
             <thead>
-              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+              <tr class="text-left" style="background:#337638; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Expense</th>
                 <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
@@ -397,7 +397,7 @@
         <div class="overflow-x-auto">
           <table class="w-full text-sm border-collapse">
             <thead>
-              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+              <tr class="text-left" style="background:#337638; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Description</th>
                 <th class="px-3 py-2 font-semibold w-24">Raw</th>
                 <th class="px-3 py-2 font-semibold w-24" style="color:#ff3103;">Rounded</th>
@@ -469,7 +469,7 @@
         <button
           type="button"
           onclick={addTimeEntry}
-          class="text-sm font-medium underline transition-colors text-[#1a1a6e] hover:text-[#14145a] active:text-[#0f0f4a]"
+          class="text-sm font-medium underline transition-colors text-[#337638] hover:text-[#14145a] active:text-[#0f0f4a]"
         >
           + Add time entry
         </button>
@@ -487,7 +487,7 @@
             <span>{formatCurrency(editTaxAmount, data.invoice.clients.currency)}</span>
           </div>
         {/if}
-        <div class="flex justify-between font-bold border-t border-gray-300 pt-1" style="color:#1a1a6e;">
+        <div class="flex justify-between font-bold border-t border-gray-300 pt-1" style="color:#337638;">
           <span>Total</span>
           <span>{formatCurrency(editTotal, data.invoice.clients.currency)}</span>
         </div>
@@ -501,7 +501,7 @@
         <button
           type="submit"
           disabled={savingItems}
-          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
           {#if savingItems}<Spinner />{/if}
           Save Changes
@@ -513,7 +513,7 @@
   <!-- Service agreement debit -->
   {#if isDraft}
     <section class="space-y-2">
-      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Service Agreement Debit</h2>
+      <h2 class="text-lg font-semibold" style="color: #337638;">Service Agreement Debit</h2>
       <form method="POST" action="?/updateDebit" use:enhance={() => {
         savingDebit = true;
         return async ({ update }) => { savingDebit = false; await update(); };
@@ -535,7 +535,7 @@
           </span>
         {/if}
         <button type="submit" disabled={savingDebit}
-          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 mb-0.5">
+          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 mb-0.5">
           {#if savingDebit}<Spinner />{/if}
           Apply
         </button>
@@ -546,7 +546,7 @@
   <!-- Notes (draft only) -->
   {#if isDraft}
     <section class="space-y-2">
-      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Notes</h2>
+      <h2 class="text-lg font-semibold" style="color: #337638;">Notes</h2>
       <form method="POST" action="?/updateNotes" use:enhance={() => {
         savingNotes = true;
         return async ({ update }) => { savingNotes = false; await update(); };
@@ -558,7 +558,7 @@
           class="w-full border rounded px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400 resize-y"
         >{data.invoice.notes ?? ''}</textarea>
         <button type="submit" disabled={savingNotes}
-          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+          class="px-4 py-2 rounded text-white text-sm transition-colors bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
           {#if savingNotes}<Spinner />{/if}
           Save Notes
         </button>

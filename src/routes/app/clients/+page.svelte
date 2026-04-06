@@ -30,9 +30,9 @@
 </script>
 
 <div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-[#1a1a6e]">Clients</h1>
+  <h1 class="text-2xl font-bold text-[#337638]">Clients</h1>
   <button onclick={() => { editing = null; showForm = true; }}
-    class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
+    class="bg-[#337638] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
     Add Client
   </button>
 </div>
@@ -91,7 +91,7 @@
     </label>
     <div class="col-span-2 flex gap-3">
       <button type="submit" disabled={submitting}
-        class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+        class="bg-[#337638] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
         {#if submitting}<Spinner />{/if}
         {editing ? 'Save' : 'Create'}
       </button>
@@ -103,7 +103,7 @@
 
 <table class="w-full text-sm">
   <thead>
-    <tr class="text-left border-b text-[#1a1a6e] uppercase text-xs">
+    <tr class="text-left border-b text-[#337638] uppercase text-xs">
       <th class="pb-2">Name</th>
       <th class="pb-2">Company</th>
       <th class="pb-2">Rate</th>
@@ -134,7 +134,7 @@
           {#if client.portal_token}
             <div class="flex items-center gap-1">
               <button type="button" onclick={() => copyPortalUrl(client.portal_token)}
-                class="text-xs text-[#1a1a6e] hover:underline transition-colors">Copy link</button>
+                class="text-xs text-[#337638] hover:underline transition-colors">Copy link</button>
               <form method="POST" action="?/resetPortalToken"
                 use:enhance={() => {
                   resetting = client.id;
@@ -153,7 +153,7 @@
         </td>
         <td class="py-3 flex gap-2 justify-end">
           <button onclick={() => startEdit(client)}
-            class="text-[#1a1a6e] hover:underline active:text-[#14145a] text-xs transition-colors">Edit</button>
+            class="text-[#337638] hover:underline active:text-[#14145a] text-xs transition-colors">Edit</button>
           <form method="POST" action="?/delete"
             use:enhance={() => {
               deleting = client.id;

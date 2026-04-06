@@ -43,7 +43,7 @@
     &larr; Agreements
   </a>
   <div class="flex items-center gap-3 mt-1">
-    <h1 class="text-2xl font-bold text-[#1a1a6e]">{data.agreement.title}</h1>
+    <h1 class="text-2xl font-bold text-[#337638]">{data.agreement.title}</h1>
     <span class="capitalize text-xs px-2 py-1 rounded {badgeClass(data.agreement.status)}">
       {data.agreement.status}
     </span>
@@ -80,7 +80,7 @@
       Copy link
     </button>
     <a href={publicUrl} target="_blank"
-      class="text-xs text-[#1a1a6e] hover:underline shrink-0">Open</a>
+      class="text-xs text-[#337638] hover:underline shrink-0">Open</a>
   </div>
 {/if}
 
@@ -93,7 +93,7 @@
     }}
     class="mb-6">
     <button type="submit" disabled={sending}
-      class="bg-[#1a1a6e] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+      class="bg-[#337638] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
       {#if sending}<Spinner />{/if}
       Mark as Sent
     </button>
@@ -135,11 +135,11 @@
         <span>Content (Markdown)</span>
         <div class="flex gap-1">
           <button type="button" onclick={() => tab = 'edit'}
-            class="px-3 py-1 rounded text-xs transition-colors {tab === 'edit' ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+            class="px-3 py-1 rounded text-xs transition-colors {tab === 'edit' ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
             Edit
           </button>
           <button type="button" onclick={() => tab = 'preview'}
-            class="px-3 py-1 rounded text-xs transition-colors {tab === 'preview' ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+            class="px-3 py-1 rounded text-xs transition-colors {tab === 'preview' ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
             Preview
           </button>
         </div>
@@ -172,12 +172,12 @@
 
 <!-- PDF attachment -->
 <div class="max-w-2xl mt-8 pt-6 border-t border-gray-200 space-y-3">
-  <h2 class="text-base font-semibold text-[#1a1a6e]">PDF Attachment</h2>
+  <h2 class="text-base font-semibold text-[#337638]">PDF Attachment</h2>
 
   {#if data.agreement.pdf_url}
     <div class="flex items-center gap-3 text-sm">
       <a href={data.agreement.pdf_url} target="_blank" rel="noopener"
-        class="text-[#1a1a6e] hover:underline">View PDF</a>
+        class="text-[#337638] hover:underline">View PDF</a>
       <span class="text-gray-300">|</span>
       {#if !isAccepted}
         <form method="POST" action="?/removePdf"
@@ -208,7 +208,7 @@
         <input type="file" name="pdf" accept="application/pdf" required
           class="text-sm text-gray-600 file:mr-3 file:px-3 file:py-1 file:rounded file:border-0 file:text-sm file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:transition-colors" />
         <button type="submit" disabled={uploadingPdf}
-          class="bg-[#1a1a6e] text-white px-4 py-1.5 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 shrink-0">
+          class="bg-[#337638] text-white px-4 py-1.5 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 shrink-0">
           {#if uploadingPdf}<Spinner />{/if}
           {data.agreement.pdf_url ? 'Replace PDF' : 'Upload PDF'}
         </button>

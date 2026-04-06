@@ -9,7 +9,7 @@
   let saved = $state(false);
 </script>
 
-<h1 class="text-2xl font-bold text-[#1a1a6e] mb-6">Settings</h1>
+<h1 class="text-2xl font-bold text-[#337638] mb-6">Settings</h1>
 
 <form method="POST" use:enhance={() => {
   saving = true;
@@ -55,7 +55,7 @@
 
   <div class="flex items-center gap-3">
     <button type="submit" disabled={saving}
-      class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm self-start transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+      class="bg-[#337638] text-white px-4 py-2 rounded text-sm self-start transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
       {#if saving}<Spinner />{/if}
       Save
     </button>

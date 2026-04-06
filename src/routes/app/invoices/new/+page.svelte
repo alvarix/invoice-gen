@@ -16,10 +16,13 @@
   let inputMode = $state<'paste' | 'csv' | 'manual'>('paste');
 
   /** Paste sub-format: legacy interleaved or columnar screenshot */
-  let pasteFormat = $state<'legacy' | 'columns'>('legacy');
+  let pasteFormat = $state<'legacy' | 'columns'>('columns');
 
   /** ID of the selected client */
   let selectedClientId = $state<string>(data.clients[0]?.id ?? '');
+
+  /** Invoice number, pre-filled from selected client but editable */
+  let invoiceName = $state('');
 
   /** Editable line items populated after a parse action */
   let items = $state<{
@@ -146,6 +149,14 @@
   /** Invoice total */
   let total = $derived(subtotal + taxAmount);
 
+  /** Recompute invoice number preview when client changes */
+  $effect(() => {
+    if (selectedClient) {
+      const year = new Date().getFullYear();
+      invoiceName = `${selectedClient.slug}-${year}-${selectedClient.invoice_seq + 1}`;
+    }
+  });
+
   /**
    * Before the generate form submits, serialize items into the hidden input.
    * @param e - the submit event from the generate form
@@ -159,7 +170,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto p-6 space-y-8">
-  <h1 class="text-2xl font-bold" style="color: #1a1a6e;">New Invoice</h1>
+  <h1 class="text-2xl font-bold" style="color: #337638;">New Invoice</h1>
 
   <!-- Client selector -->
   <section class="space-y-2">
@@ -183,11 +194,11 @@
         type="button"
         onclick={() => (inputMode = 'paste')}
         class="px-4 py-2 rounded font-medium text-sm border transition-colors"
-        class:bg-[#1a1a6e]={inputMode === 'paste'}
+        class:bg-[#337638]={inputMode === 'paste'}
         class:text-white={inputMode === 'paste'}
-        class:border-[#1a1a6e]={true}
+        class:border-[#337638]={true}
         class:bg-white={inputMode !== 'paste'}
-        class:text-[#1a1a6e]={inputMode !== 'paste'}
+        class:text-[#337638]={inputMode !== 'paste'}
         class:hover:bg-[#14145a]={inputMode === 'paste'}
         class:hover:bg-gray-50={inputMode !== 'paste'}
       >
@@ -197,11 +208,11 @@
         type="button"
         onclick={() => (inputMode = 'csv')}
         class="px-4 py-2 rounded font-medium text-sm border transition-colors"
-        class:bg-[#1a1a6e]={inputMode === 'csv'}
+        class:bg-[#337638]={inputMode === 'csv'}
         class:text-white={inputMode === 'csv'}
-        class:border-[#1a1a6e]={true}
+        class:border-[#337638]={true}
         class:bg-white={inputMode !== 'csv'}
-        class:text-[#1a1a6e]={inputMode !== 'csv'}
+        class:text-[#337638]={inputMode !== 'csv'}
         class:hover:bg-[#14145a]={inputMode === 'csv'}
         class:hover:bg-gray-50={inputMode !== 'csv'}
       >
@@ -211,11 +222,11 @@
         type="button"
         onclick={() => (inputMode = 'manual')}
         class="px-4 py-2 rounded font-medium text-sm border transition-colors"
-        class:bg-[#1a1a6e]={inputMode === 'manual'}
+        class:bg-[#337638]={inputMode === 'manual'}
         class:text-white={inputMode === 'manual'}
-        class:border-[#1a1a6e]={true}
+        class:border-[#337638]={true}
         class:bg-white={inputMode !== 'manual'}
-        class:text-[#1a1a6e]={inputMode !== 'manual'}
+        class:text-[#337638]={inputMode !== 'manual'}
         class:hover:bg-[#14145a]={inputMode === 'manual'}
         class:hover:bg-gray-50={inputMode !== 'manual'}
       >
@@ -237,19 +248,19 @@
           <div class="flex gap-1 text-xs">
             <button type="button" onclick={() => (pasteFormat = 'legacy')}
               class="px-2 py-0.5 rounded border transition-colors"
-              class:bg-[#1a1a6e]={pasteFormat === 'legacy'}
+              class:bg-[#337638]={pasteFormat === 'legacy'}
               class:text-white={pasteFormat === 'legacy'}
-              class:border-[#1a1a6e]={true}
+              class:border-[#337638]={true}
               class:bg-white={pasteFormat !== 'legacy'}
-              class:text-[#1a1a6e]={pasteFormat !== 'legacy'}
+              class:text-[#337638]={pasteFormat !== 'legacy'}
             >Legacy</button>
             <button type="button" onclick={() => (pasteFormat = 'columns')}
               class="px-2 py-0.5 rounded border transition-colors"
-              class:bg-[#1a1a6e]={pasteFormat === 'columns'}
+              class:bg-[#337638]={pasteFormat === 'columns'}
               class:text-white={pasteFormat === 'columns'}
-              class:border-[#1a1a6e]={true}
+              class:border-[#337638]={true}
               class:bg-white={pasteFormat !== 'columns'}
-              class:text-[#1a1a6e]={pasteFormat !== 'columns'}
+              class:text-[#337638]={pasteFormat !== 'columns'}
             >With dates</button>
           </div>
         </div>
@@ -305,13 +316,13 @@
   <!-- Line items table: shown after parse, or immediately in manual mode -->
   {#if items.length > 0 || inputMode === 'manual'}
     <section class="space-y-3">
-      <h2 class="text-lg font-semibold" style="color: #1a1a6e;">Line Items</h2>
+      <h2 class="text-lg font-semibold" style="color: #337638;">Line Items</h2>
       <!-- Expenses table -->
       {#if expenseItems.length > 0}
         <div class="overflow-x-auto">
           <table class="w-full text-sm border-collapse">
             <thead>
-              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+              <tr class="text-left" style="background:#337638; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Expense</th>
                 <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
@@ -363,7 +374,7 @@
         <div class="overflow-x-auto">
           <table class="w-full text-sm border-collapse">
             <thead>
-              <tr class="text-left" style="background:#1a1a6e; color:#fff;">
+              <tr class="text-left" style="background:#337638; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Description</th>
                 <th class="px-3 py-2 font-semibold w-24">Raw</th>
                 <th class="px-3 py-2 font-semibold w-24" style="color:#ff3103;">Rounded</th>
@@ -435,7 +446,7 @@
         <button
           type="button"
           onclick={addTimeEntry}
-          class="text-sm font-medium underline transition-colors text-[#1a1a6e] hover:text-[#14145a] active:text-[#0f0f4a]"
+          class="text-sm font-medium underline transition-colors text-[#337638] hover:text-[#14145a] active:text-[#0f0f4a]"
         >
           + Add time entry
         </button>
@@ -453,7 +464,7 @@
             <span>{formatCurrency(taxAmount)}</span>
           </div>
         {/if}
-        <div class="flex justify-between font-bold border-t border-gray-300 pt-1" style="color:#1a1a6e;">
+        <div class="flex justify-between font-bold border-t border-gray-300 pt-1" style="color:#337638;">
           <span>Total</span>
           <span>{formatCurrency(total)}</span>
         </div>
@@ -499,12 +510,25 @@
               class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
+          <div class="space-y-1">
+            <label class="block text-sm font-semibold text-gray-700" for="invoice-number">
+              Invoice Number
+            </label>
+            <input
+              id="invoice-number"
+              name="invoice_number"
+              type="text"
+              required
+              bind:value={invoiceName}
+              class="border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={generating}
-          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#1a1a6e] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          class="px-6 py-2.5 rounded text-white font-semibold text-sm transition-colors bg-[#337638] hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
           {#if generating}<Spinner />{/if}
           Generate Invoice

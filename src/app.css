@@ -20,7 +20,7 @@
   @top-right {
     content: "Page " counter(page);
     font-size: 10px;
-    color: #1a1a6e;
+    color: #337638;
     padding-bottom: 4px;
   }
 }

@@ -20,7 +20,7 @@
   <title>{data.agreement.title}</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-[#1a1a6e]">
+<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-[#337638]">
 
   <!-- Header -->
   <div class="flex justify-between items-start mb-8">
@@ -55,7 +55,7 @@
 
     {#if data.contentHtml}
       <div class="prose prose-sm max-w-none
-        [&_h1]:text-[#1a1a6e] [&_h2]:text-[#1a1a6e] [&_h3]:text-[#1a1a6e]
+        [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638]
         [&_a]:text-[#ff3103]">
         {@html data.contentHtml}
       </div>
@@ -91,11 +91,11 @@
 
     {#if !showConfirm}
       <button type="button" onclick={() => showConfirm = true}
-        class="bg-[#1a1a6e] text-white px-6 py-3 rounded text-sm font-medium transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
+        class="bg-[#337638] text-white px-6 py-3 rounded text-sm font-medium transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a]">
         I Accept This Agreement
       </button>
     {:else}
-      <div class="border border-[#1a1a6e] rounded px-5 py-4 max-w-sm">
+      <div class="border border-[#337638] rounded px-5 py-4 max-w-sm">
         <p class="text-sm mb-4">
           By confirming, you agree to the terms of <strong>{data.agreement.title}</strong>.
           This action is recorded with a timestamp.
@@ -107,7 +107,7 @@
           }}
           class="flex gap-3">
           <button type="submit" disabled={accepting}
-            class="bg-[#1a1a6e] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+            class="bg-[#337638] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
             {#if accepting}<Spinner />{/if}
             Confirm Acceptance
           </button>

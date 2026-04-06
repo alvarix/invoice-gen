@@ -18,7 +18,7 @@
   <a href="/app/agreements" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">
     &larr; Agreements
   </a>
-  <h1 class="text-2xl font-bold text-[#1a1a6e] mt-1">New Agreement</h1>
+  <h1 class="text-2xl font-bold text-[#337638] mt-1">New Agreement</h1>
 </div>
 
 {#if form?.error}
@@ -54,11 +54,11 @@
       <span>Content (Markdown)</span>
       <div class="flex gap-1">
         <button type="button" onclick={() => tab = 'edit'}
-          class="px-3 py-1 rounded text-xs transition-colors {tab === 'edit' ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+          class="px-3 py-1 rounded text-xs transition-colors {tab === 'edit' ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
           Edit
         </button>
         <button type="button" onclick={() => tab = 'preview'}
-          class="px-3 py-1 rounded text-xs transition-colors {tab === 'preview' ? 'bg-[#1a1a6e] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
+          class="px-3 py-1 rounded text-xs transition-colors {tab === 'preview' ? 'bg-[#337638] text-white' : 'bg-gray-100 hover:bg-gray-200'}">
           Preview
         </button>
       </div>
@@ -84,7 +84,7 @@
   </div>
 
   <button type="submit" disabled={submitting}
-    class="bg-[#1a1a6e] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+    class="bg-[#337638] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
     {#if submitting}<Spinner />{/if}
     Create Agreement
   </button>

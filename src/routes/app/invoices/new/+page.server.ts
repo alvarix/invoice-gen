@@ -73,6 +73,7 @@ export const actions: Actions = {
     const dueDate = data.get('due_date') as string;
     const itemsJson = data.get('items') as string;
     const items = JSON.parse(itemsJson);
+    const submittedInvoiceNumber = (data.get('invoice_number') as string)?.trim();
 
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
     if (!client) return fail(400, { error: 'Client not found' });
@@ -81,7 +82,7 @@ export const actions: Actions = {
     const seq = client.invoice_seq + 1;
     await supabase.from('clients').update({ invoice_seq: seq }).eq('id', clientId);
 
-    const invoiceNumber = generateInvoiceNumber(client.slug, seq);
+    const invoiceNumber = submittedInvoiceNumber || generateInvoiceNumber(client.slug, seq);
     const totals = calculateTotals(items, client.tax_rate);
 
     const { data: invoice } = await supabase.from('invoices').insert({
