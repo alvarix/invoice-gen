@@ -8,6 +8,7 @@
     { href: '/app/agreements', label: 'Agreements' },
     { href: '/app/clients', label: 'Clients' },
     { href: '/app/settings', label: 'Settings' },
+    { href: '/app/trash', label: 'Trash' },
   ];
 </script>
 

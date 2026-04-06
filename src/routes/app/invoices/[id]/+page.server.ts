@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
   const { data: invoice } = await supabase
-    .from('invoices').select('*, clients(*)').eq('id', params.id).single();
+    .from('invoices').select('*, clients(*)').eq('id', params.id).is('deleted_at', null).single();
   if (!invoice) error(404);
 
   const { data: items } = await supabase

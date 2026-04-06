@@ -5,7 +5,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
   const { data: invoice } = await supabase
-    .from('invoices').select('*, clients(*)').eq('public_token', params.token).single();
+    .from('invoices').select('*, clients(*)').eq('public_token', params.token).is('deleted_at', null).single();
   if (!invoice) error(404);
 
   const { data: items } = await supabase

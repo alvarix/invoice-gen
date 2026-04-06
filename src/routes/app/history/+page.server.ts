@@ -9,6 +9,7 @@ export const load: PageServerLoad = async ({ url }) => {
   let query = supabase
     .from('invoices')
     .select('*, clients(name, slug)')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (clientId) query = query.eq('client_id', clientId);
@@ -30,7 +31,8 @@ export const load: PageServerLoad = async ({ url }) => {
 
 export const actions: Actions = {
   /**
-   * Delete an invoice and its line items.
+   * Soft-delete an invoice by setting deleted_at to now.
+   * Line items are preserved; invoice moves to trash.
    * @param request - form data containing invoice_id
    */
   deleteInvoice: async ({ request }) => {
@@ -38,19 +40,13 @@ export const actions: Actions = {
     const invoiceId = data.get('invoice_id') as string;
     if (!invoiceId) return fail(400, { error: 'Missing invoice ID' });
 
-    // Delete line items first (FK constraint)
-    const { error: itemsError } = await supabase
-      .from('line_items').delete().eq('invoice_id', invoiceId);
-    if (itemsError) {
-      console.error('Failed to delete line items:', itemsError);
-      return fail(500, { error: 'Failed to delete line items' });
-    }
-
     const { error: invoiceError } = await supabase
-      .from('invoices').delete().eq('id', invoiceId);
+      .from('invoices')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', invoiceId);
     if (invoiceError) {
-      console.error('Failed to delete invoice:', invoiceError);
-      return fail(500, { error: 'Failed to delete invoice' });
+      console.error('Failed to trash invoice:', invoiceError);
+      return fail(500, { error: 'Failed to trash invoice' });
     }
   }
 };

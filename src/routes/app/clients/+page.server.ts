@@ -6,12 +6,12 @@ export const load: PageServerLoad = async () => {
   // Fetch clients with their most recent invoice date and status
   const { data: clients } = await supabase
     .from('clients')
-    .select('*, invoices(invoice_date, status, invoice_number)')
+    .select('*, invoices(invoice_date, status, invoice_number, deleted_at)')
     .order('name');
 
   // Flatten to include only the latest invoice per client
   const clientsWithLatest = (clients ?? []).map((c: any) => {
-    const sorted = (c.invoices ?? []).sort(
+    const sorted = (c.invoices ?? []).filter((inv: any) => !inv.deleted_at).sort(
       (a: any, b: any) => new Date(b.invoice_date).getTime() - new Date(a.invoice_date).getTime()
     );
     return { ...c, latest_invoice: sorted[0] ?? null, invoices: undefined };

@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({ params }) => {
       .select('id, invoice_number, invoice_date, status, total, public_token')
       .eq('client_id', client.id)
       .neq('status', 'draft')
+      .is('deleted_at', null)
       .order('invoice_date', { ascending: false }),
 
     supabase
