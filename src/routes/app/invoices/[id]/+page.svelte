@@ -46,6 +46,7 @@
    * Add a blank expense row at the start (expenses group).
    */
   function addExpense() {
+    const today = new Date().toISOString().slice(0, 10);
     editItems = [
       {
         id: '',
@@ -57,6 +58,7 @@
         rate: null,
         amount: 0,
         sort_order: 0,
+        date: today,
       },
       ...editItems,
     ];
@@ -98,6 +100,7 @@
    * Add a blank time entry row at the end (time group).
    */
   function addTimeEntry() {
+    const today = new Date().toISOString().slice(0, 10);
     editItems = [
       ...editItems,
       {
@@ -110,6 +113,7 @@
         rate: data.invoice.clients?.hourly_rate ?? 0,
         amount: 0,
         sort_order: editItems.length,
+        date: today,
       },
     ];
   }
@@ -343,6 +347,7 @@
             <thead>
               <tr class="text-left" style="background:#1a1a6e; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Expense</th>
+                <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
                 <th class="px-3 py-2 w-10"></th>
               </tr>
@@ -357,6 +362,13 @@
                         bind:value={item.description}
                         placeholder="Expense description"
                         class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="date"
+                        bind:value={item.date}
+                        class="w-full border-0 bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
                       />
                     </td>
                     <td class="px-3 py-1.5 text-right">
@@ -389,6 +401,7 @@
                 <th class="px-3 py-2 font-semibold">Description</th>
                 <th class="px-3 py-2 font-semibold w-24">Raw</th>
                 <th class="px-3 py-2 font-semibold w-24" style="color:#ff3103;">Rounded</th>
+                <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
                 <th class="px-3 py-2 w-10"></th>
               </tr>
@@ -415,6 +428,13 @@
                     </td>
                     <td class="px-3 py-1.5 font-mono text-xs" style="color:#ff3103;">
                       {item.duration_rounded ?? '—'}
+                    </td>
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="date"
+                        bind:value={item.date}
+                        class="w-full border-0 bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
                     </td>
                     <td class="px-3 py-1.5 text-right">
                       <input

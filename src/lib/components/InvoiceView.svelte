@@ -122,6 +122,7 @@
       <thead>
         <tr class="border-t border-b border-[#1a1a6e] uppercase text-xs">
           <th class="text-left py-2 font-semibold">Description</th>
+          <th class="text-left py-2 font-semibold text-gray-400 w-24">Date</th>
           <th class="text-right py-2 font-semibold text-[#ff3103]">Quantity</th>
           <th class="text-right py-2 font-semibold"></th>
         </tr>
@@ -130,6 +131,7 @@
         {#each items.filter(i => i.type === 'time') as item}
           <tr class="border-b border-gray-200">
             <td class="py-2">{item.description}</td>
+            <td class="py-2 text-gray-400 text-xs">{item.date ? formatDate(item.date) : ''}</td>
             <td class="py-2 text-right text-[#ff3103]">
               {item.duration_rounded ?? '—'}
             </td>

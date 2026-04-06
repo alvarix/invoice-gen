@@ -17,7 +17,18 @@ export const actions: Actions = {
     const clientId = data.get('client_id') as string;
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
     if (!client) return fail(400, { error: 'Client not found' });
-    const entries = parseTogglPaste(text);
+    const pasteFormat = data.get('paste_format') as string;
+    const isColumns = pasteFormat === 'columns';
+    const looksLegacy = /^\d+:\d{2}:\d{2}$/m.test(text);
+    const looksColumnar = /^DESCRIPTION/im.test(text) && /^DURATION/im.test(text);
+    if (isColumns && looksLegacy && !looksColumnar) {
+      return fail(400, { error: 'This looks like legacy format. Switch to Legacy mode.' });
+    }
+    if (!isColumns && looksColumnar) {
+      return fail(400, { error: 'This looks like screenshot format. Switch to "With dates" mode.' });
+    }
+    const entries = parseTogglPaste(text, isColumns);
+    const today = new Date().toISOString().slice(0, 10);
     const items = entries.map((e, i) => ({
       type: 'time' as const,
       description: e.description,
@@ -26,6 +37,7 @@ export const actions: Actions = {
       rate: client.hourly_rate,
       amount: Math.round(e.hours_rounded * client.hourly_rate * 100) / 100,
       sort_order: i,
+      date: e.date ?? today,
     }));
     return { parsed: items, client_id: clientId };
   },
@@ -39,6 +51,7 @@ export const actions: Actions = {
     const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
     if (!client) return fail(400, { error: 'Client not found' });
     const entries = parseTogglCSV(text);
+    const today = new Date().toISOString().slice(0, 10);
     const items = entries.map((e, i) => ({
       type: 'time' as const,
       description: e.description,
@@ -47,6 +60,7 @@ export const actions: Actions = {
       rate: client.hourly_rate,
       amount: Math.round(e.hours_rounded * client.hourly_rate * 100) / 100,
       sort_order: i,
+      date: e.date ?? today,
     }));
     return { parsed: items, client_id: clientId };
   },

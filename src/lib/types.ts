@@ -42,6 +42,7 @@ export interface LineItem {
   rate: number | null;
   amount: number;
   sort_order: number;
+  date: string | null;
 }
 
 export interface Agreement {

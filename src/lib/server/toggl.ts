@@ -36,16 +36,65 @@ export interface ParsedEntry {
   duration_raw: string;
   duration_rounded: string;
   hours_rounded: number;
+  /** Date string in YYYY-MM-DD format, if available from the source */
+  date: string | null;
+}
+
+/**
+ * Parse Toggl screenshot/column-view paste into time entries.
+ * Format: four sections separated by headers DESCRIPTION, DATE, PROJECT, DURATION.
+ * Each section lists values in order, one per line.
+ * (N) count markers in the description section are ignored.
+ * @param text - raw pasted text from Toggl column view
+ * @returns array of parsed entries
+ */
+function parseTogglColumns(text: string): ParsedEntry[] {
+  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+
+  const sections: Record<string, string[]> = { description: [], date: [], project: [], duration: [] };
+  let current = '';
+
+  for (const line of lines) {
+    if (/^DESCRIPTION/i.test(line))      current = 'description';
+    else if (/^DATE/i.test(line))        current = 'date';
+    else if (/^PROJECT/i.test(line))     current = 'project';
+    else if (/^DURATION/i.test(line))    current = 'duration';
+    else if (current) sections[current].push(line);
+  }
+
+  const descriptions = sections.description.filter(l => !/^\(\d+\)$/.test(l));
+  const dates = sections.date;
+  const durations = sections.duration;
+
+  return durations.map((duration_raw, i) => {
+    const rawSeconds = parseDuration(duration_raw);
+    const roundedSeconds = roundUp15(rawSeconds);
+    let date: string | null = null;
+    if (dates[i]) {
+      const parts = dates[i].split('/');
+      if (parts.length === 3) date = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+    }
+    return {
+      description: descriptions[i] || 'misc',
+      duration_raw,
+      duration_rounded: formatDuration(roundedSeconds),
+      hours_rounded: roundedSeconds / 3600,
+      date
+    };
+  }).filter(e => e.hours_rounded > 0);
 }
 
 /**
  * Parse Toggl copy/paste text into time entries.
- * Format per entry: description, [optional count e.g. "(4)"], client/project, duration.
- * Duration lines match h:mm:ss exactly. Description is used verbatim — no stripping.
  * @param text - raw pasted text from Toggl
+ * @param columns - true to use the columnar screenshot format (DESCRIPTION/DATE/DURATION sections);
+ *                  false (default) for the legacy interleaved format
  * @returns array of parsed entries
  */
-export function parseTogglPaste(text: string): ParsedEntry[] {
+export function parseTogglPaste(text: string, columns = false): ParsedEntry[] {
+  if (columns) {
+    return parseTogglColumns(text);
+  }
   const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
   const entries: ParsedEntry[] = [];
 
@@ -71,7 +120,8 @@ export function parseTogglPaste(text: string): ParsedEntry[] {
       description,
       duration_raw,
       duration_rounded: formatDuration(roundedSeconds),
-      hours_rounded: roundedSeconds / 3600
+      hours_rounded: roundedSeconds / 3600,
+      date: null
     });
   }
 
@@ -117,6 +167,7 @@ export function parseTogglCSV(csvText: string): ParsedEntry[] {
   const header = splitCSVLine(lines[0]).map(h => h.toLowerCase());
   const descIdx = header.findIndex(h => h === 'description');
   const durIdx = header.findIndex(h => h === 'duration');
+  const dateIdx = header.findIndex(h => h === 'start date');
 
   if (descIdx === -1 || durIdx === -1) return [];
 
@@ -126,11 +177,18 @@ export function parseTogglCSV(csvText: string): ParsedEntry[] {
     const duration_raw = cols[durIdx] || '0:00:00';
     const rawSeconds = parseDuration(duration_raw);
     const roundedSeconds = roundUp15(rawSeconds);
+    // Toggl exports dates as MM/DD/YYYY — normalize to YYYY-MM-DD
+    let date: string | null = null;
+    if (dateIdx !== -1 && cols[dateIdx]) {
+      const parts = cols[dateIdx].split('/');
+      if (parts.length === 3) date = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+    }
     return {
       description,
       duration_raw,
       duration_rounded: formatDuration(roundedSeconds),
-      hours_rounded: roundedSeconds / 3600
+      hours_rounded: roundedSeconds / 3600,
+      date
     };
   }).filter(e => e.hours_rounded > 0);
 }

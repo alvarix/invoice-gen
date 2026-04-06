@@ -15,6 +15,9 @@
   /** Currently selected input mode for Toggl data */
   let inputMode = $state<'paste' | 'csv' | 'manual'>('paste');
 
+  /** Paste sub-format: legacy interleaved or columnar screenshot */
+  let pasteFormat = $state<'legacy' | 'columns'>('legacy');
+
   /** ID of the selected client */
   let selectedClientId = $state<string>(data.clients[0]?.id ?? '');
 
@@ -27,6 +30,7 @@
     rate: number | null;
     amount: number;
     sort_order: number;
+    date: string | null;
   }[]>([]);
 
   /** Submission states */
@@ -65,6 +69,7 @@
         rate: null,
         amount: 0,
         sort_order: 0,
+        date: today,
       },
       ...items,
     ];
@@ -116,6 +121,7 @@
         rate: selectedClient?.hourly_rate ?? 0,
         amount: 0,
         sort_order: items.length,
+        date: today,
       },
     ];
   }
@@ -223,9 +229,30 @@
         return async ({ update }) => { parsing = false; await update(); };
       }}>
         <input type="hidden" name="client_id" value={selectedClientId} />
-        <label class="block text-sm font-semibold text-gray-700" for="toggl-paste">
-          Paste Toggl entries
-        </label>
+        <input type="hidden" name="paste_format" bind:value={pasteFormat} />
+        <div class="flex items-center gap-3">
+          <label class="block text-sm font-semibold text-gray-700" for="toggl-paste">
+            Paste Toggl entries (use screenshot to include dates)
+          </label>
+          <div class="flex gap-1 text-xs">
+            <button type="button" onclick={() => (pasteFormat = 'legacy')}
+              class="px-2 py-0.5 rounded border transition-colors"
+              class:bg-[#1a1a6e]={pasteFormat === 'legacy'}
+              class:text-white={pasteFormat === 'legacy'}
+              class:border-[#1a1a6e]={true}
+              class:bg-white={pasteFormat !== 'legacy'}
+              class:text-[#1a1a6e]={pasteFormat !== 'legacy'}
+            >Legacy</button>
+            <button type="button" onclick={() => (pasteFormat = 'columns')}
+              class="px-2 py-0.5 rounded border transition-colors"
+              class:bg-[#1a1a6e]={pasteFormat === 'columns'}
+              class:text-white={pasteFormat === 'columns'}
+              class:border-[#1a1a6e]={true}
+              class:bg-white={pasteFormat !== 'columns'}
+              class:text-[#1a1a6e]={pasteFormat !== 'columns'}
+            >With dates</button>
+          </div>
+        </div>
         <textarea
           id="toggl-paste"
           name="toggl_text"
@@ -233,14 +260,19 @@
           placeholder="description&#10;Client Project&#10;h:mm:ss&#10;description&#10;Client Project&#10;h:mm:ss"
           class="w-full border border-gray-300 rounded px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
         ></textarea>
-        <button
-          type="submit"
-          disabled={parsing}
-          class="px-5 py-2 rounded text-white font-medium text-sm transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-        >
-          {#if parsing}<Spinner />{/if}
-          Parse
-        </button>
+        <div class="flex items-center gap-4">
+          <button
+            type="submit"
+            disabled={parsing}
+            class="px-5 py-2 rounded text-white font-medium text-sm transition-colors bg-[#ff3103] hover:bg-[#d04516] active:bg-[#b83d13] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          >
+            {#if parsing}<Spinner />{/if}
+            Parse
+          </button>
+          {#if form?.error}
+            <p class="text-sm text-red-600">{form.error}</p>
+          {/if}
+        </div>
       </form>
     {:else}
       <form method="POST" action="?/parseCSV" enctype="multipart/form-data" class="space-y-3" use:enhance={() => {
@@ -281,6 +313,7 @@
             <thead>
               <tr class="text-left" style="background:#1a1a6e; color:#fff;">
                 <th class="px-3 py-2 font-semibold">Expense</th>
+                <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
                 <th class="px-3 py-2 w-10"></th>
               </tr>
@@ -295,6 +328,13 @@
                         bind:value={item.description}
                         placeholder="Expense description"
                         class="w-full border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
+                    </td>
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="date"
+                        bind:value={item.date}
+                        class="w-full border-0 bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
                       />
                     </td>
                     <td class="px-3 py-1.5 text-right">
@@ -327,6 +367,7 @@
                 <th class="px-3 py-2 font-semibold">Description</th>
                 <th class="px-3 py-2 font-semibold w-24">Raw</th>
                 <th class="px-3 py-2 font-semibold w-24" style="color:#ff3103;">Rounded</th>
+                <th class="px-3 py-2 font-semibold w-28">Date</th>
                 <th class="px-3 py-2 font-semibold w-28 text-right">Amount</th>
                 <th class="px-3 py-2 w-10"></th>
               </tr>
@@ -353,6 +394,13 @@
                     </td>
                     <td class="px-3 py-1.5 font-mono text-xs" style="color:#ff3103;">
                       {item.duration_rounded ?? '—'}
+                    </td>
+                    <td class="px-3 py-1.5">
+                      <input
+                        type="date"
+                        bind:value={item.date}
+                        class="w-full border-0 bg-transparent text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 rounded px-1"
+                      />
                     </td>
                     <td class="px-3 py-1.5 text-right">
                       <input
