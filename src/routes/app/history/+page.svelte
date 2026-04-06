@@ -6,8 +6,11 @@
 
   let { data }: { data: PageData } = $props();
 
-  /** ID of the invoice pending deletion (shows confirmation) */
+  /** ID of the invoice pending deletion (shows inline confirmation, drafts only) */
   let confirmDeleteId = $state<string | null>(null);
+
+  /** Non-draft invoice pending deletion (shows modal) */
+  let confirmDeleteInvoice = $state<(typeof data.invoices)[0] | null>(null);
 
   /** Whether a delete is in progress */
   let deleting = $state(false);
@@ -110,22 +113,41 @@
               </td>
               <td class="px-4 py-3 text-center">
                 {#if confirmDeleteId === invoice.id}
-                  <form method="POST" action="?/deleteInvoice" use:enhance={() => {
-                    deleting = true;
-                    return async ({ update }) => {
-                      deleting = false;
-                      confirmDeleteId = null;
-                      await update();
-                    };
-                  }}>
-                    <input type="hidden" name="invoice_id" value={invoice.id} />
+                  {#if invoice.status === 'draft'}
+                    <form method="POST" action="?/deleteInvoice" use:enhance={() => {
+                      deleting = true;
+                      return async ({ update }) => {
+                        deleting = false;
+                        confirmDeleteId = null;
+                        await update();
+                      };
+                    }}>
+                      <input type="hidden" name="invoice_id" value={invoice.id} />
+                      <div class="flex items-center gap-1">
+                        <button
+                          type="submit"
+                          disabled={deleting}
+                          class="text-xs font-semibold text-red-600 hover:text-red-800 active:text-red-900 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+                        >
+                          {#if deleting}<Spinner />{/if}
+                          Yes
+                        </button>
+                        <button
+                          type="button"
+                          onclick={() => (confirmDeleteId = null)}
+                          class="text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </form>
+                  {:else}
                     <div class="flex items-center gap-1">
                       <button
-                        type="submit"
-                        disabled={deleting}
-                        class="text-xs font-semibold text-red-600 hover:text-red-800 active:text-red-900 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+                        type="button"
+                        onclick={() => { confirmDeleteInvoice = invoice; confirmDeleteId = null; }}
+                        class="text-xs font-semibold text-red-600 hover:text-red-800 active:text-red-900 transition-colors"
                       >
-                        {#if deleting}<Spinner />{/if}
                         Yes
                       </button>
                       <button
@@ -136,7 +158,7 @@
                         No
                       </button>
                     </div>
-                  </form>
+                  {/if}
                 {:else}
                   <button
                     type="button"
@@ -153,3 +175,73 @@
     </div>
   {/if}
 </div>
+
+{#if confirmDeleteInvoice}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-modal-title"
+  >
+    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-6 space-y-4">
+      <h2 id="delete-modal-title" class="text-base font-bold text-red-700">
+        Delete {confirmDeleteInvoice.status} invoice?
+      </h2>
+      <dl class="text-sm space-y-1.5 text-gray-700">
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Invoice</dt>
+          <dd class="font-medium font-mono">{confirmDeleteInvoice.invoice_number}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Client</dt>
+          <dd>{confirmDeleteInvoice.clients?.name ?? '—'}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Date</dt>
+          <dd>{confirmDeleteInvoice.invoice_date ? formatDate(confirmDeleteInvoice.invoice_date) : '—'}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Status</dt>
+          <dd class="capitalize font-semibold">{confirmDeleteInvoice.status}</dd>
+        </div>
+        <div class="flex justify-between border-t border-gray-100 pt-1.5">
+          <dt class="text-gray-500">Total</dt>
+          <dd class="font-bold">{formatCurrency(confirmDeleteInvoice.total)}</dd>
+        </div>
+      </dl>
+      <p class="text-xs text-red-600">
+        This invoice has been {confirmDeleteInvoice.status}. Deleting it cannot be undone.
+      </p>
+      <form
+        method="POST"
+        action="?/deleteInvoice"
+        use:enhance={() => {
+          deleting = true;
+          return async ({ update }) => {
+            deleting = false;
+            confirmDeleteInvoice = null;
+            await update();
+          };
+        }}
+        class="flex gap-3 justify-end pt-2"
+      >
+        <input type="hidden" name="invoice_id" value={confirmDeleteInvoice.id} />
+        <button
+          type="button"
+          onclick={() => (confirmDeleteInvoice = null)}
+          class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={deleting}
+          class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+        >
+          {#if deleting}<Spinner />{/if}
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
+{/if}
