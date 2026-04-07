@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
   import Spinner from '$lib/components/Spinner.svelte';
+  import { marked } from 'marked';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -170,8 +171,13 @@
         </textarea>
       {:else}
         <textarea name="content" class="hidden" value={content}></textarea>
-        <div class="border rounded px-4 py-3 min-h-[20rem] bg-gray-50">
-          <pre class="whitespace-pre-wrap font-sans text-sm">{content || 'Nothing to preview.'}</pre>
+        <div class="border rounded px-4 py-3 min-h-[20rem] bg-gray-50 prose prose-sm max-w-none
+          [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638] [&_a]:text-[#ff3103]">
+          {#if content}
+            {@html marked(content)}
+          {:else}
+            <p class="text-gray-400">Nothing to preview.</p>
+          {/if}
         </div>
       {/if}
     </div>
