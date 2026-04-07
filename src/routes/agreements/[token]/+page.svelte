@@ -41,7 +41,7 @@
     {#if data.agreement.pdf_url}
       <div>
         <iframe
-          src={data.agreement.pdf_url}
+          src="https://docs.google.com/viewer?url={encodeURIComponent(data.agreement.pdf_url)}&embedded=true"
           title={data.agreement.title}
           class="w-full rounded border"
           style="height: 70vh; min-height: 400px;"

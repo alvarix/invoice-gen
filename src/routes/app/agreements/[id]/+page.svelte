@@ -7,6 +7,7 @@
 
   let saving = $state(false);
   let sending = $state(false);
+  let emailing = $state(false);
   let retracting = $state(false);
   let uploadingPdf = $state(false);
   let removingPdf = $state(false);
@@ -73,7 +74,7 @@
 
 <!-- Public link (sent or accepted) -->
 {#if isSent || isAccepted}
-  <div class="flex items-center gap-2 mb-6">
+  <div class="flex items-center gap-2 mb-4 flex-wrap">
     <span class="text-sm text-gray-500 truncate">{publicUrl}</span>
     <button type="button" onclick={copyUrl}
       class="text-xs border rounded px-2 py-1 hover:bg-gray-50 transition-colors shrink-0">
@@ -82,6 +83,24 @@
     <a href={publicUrl} target="_blank"
       class="text-xs text-[#337638] hover:underline shrink-0">Open</a>
   </div>
+
+  {#if isSent && data.agreement.clients?.email}
+    <form method="POST" action="?/sendEmail"
+      use:enhance={() => {
+        emailing = true;
+        return async ({ update }) => { emailing = false; await update(); };
+      }}
+      class="mb-6">
+      <button type="submit" disabled={emailing}
+        class="bg-[#337638] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+        {#if emailing}<Spinner />{/if}
+        Email Agreement to Client
+      </button>
+      <p class="text-xs text-gray-400 mt-1">Sends to {data.agreement.clients.email}</p>
+    </form>
+  {:else if isSent}
+    <p class="text-xs text-gray-400 mb-6">No email on file for this client — share the link manually.</p>
+  {/if}
 {/if}
 
 <!-- Send / Retract actions -->
@@ -175,11 +194,11 @@
   <h2 class="text-base font-semibold text-[#337638]">PDF Attachment</h2>
 
   {#if data.agreement.pdf_url}
-    <div class="flex items-center gap-3 text-sm">
+    <div class="flex items-center gap-3 text-sm mb-3">
       <a href={data.agreement.pdf_url} target="_blank" rel="noopener"
-        class="text-[#337638] hover:underline">View PDF</a>
-      <span class="text-gray-300">|</span>
+        class="text-[#337638] hover:underline">Open PDF</a>
       {#if !isAccepted}
+        <span class="text-gray-300">|</span>
         <form method="POST" action="?/removePdf"
           use:enhance={() => {
             removingPdf = true;
@@ -194,6 +213,12 @@
         </form>
       {/if}
     </div>
+    <iframe
+      src="https://docs.google.com/viewer?url={encodeURIComponent(data.agreement.pdf_url)}&embedded=true"
+      title={data.agreement.title}
+      class="w-full rounded border"
+      style="height: 70vh; min-height: 400px;"
+    ></iframe>
   {:else}
     <p class="text-sm text-gray-400">No PDF attached.</p>
   {/if}

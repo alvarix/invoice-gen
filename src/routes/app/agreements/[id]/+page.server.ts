@@ -1,4 +1,6 @@
 import { supabase } from '$lib/server/supabase';
+import { sendAgreementEmail } from '$lib/server/brevo';
+import { env } from '$env/dynamic/private';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -65,7 +67,8 @@ export const actions: Actions = {
 
   /**
    * Upload a PDF to Supabase Storage and store the public URL on the agreement.
-   * File is stored as agreements/{id}.pdf — uploading again replaces the previous file.
+   * File is stored as agreements/{id}/{ownerName} - {title}.pdf for a friendly download name.
+   * Uploading again replaces the previous file.
    */
   uploadPdf: async ({ request, params }) => {
     const data = await request.formData();
@@ -75,21 +78,33 @@ export const actions: Actions = {
     if (file.type !== 'application/pdf') return fail(400, { error: 'File must be a PDF.' });
     if (file.size > 10 * 1024 * 1024) return fail(400, { error: 'File must be under 10 MB.' });
 
+    const { data: agreement } = await supabase
+      .from('agreements').select('title').eq('id', params.id).single();
+    if (!agreement) return fail(404, { error: 'Agreement not found.' });
+
+    const { data: settings } = await supabase.from('settings').select('owner_name').eq('id', 1).single();
+    const ownerName = settings?.owner_name ?? 'Alvar Sirlin';
+
+    // Sanitize title for use in a filename
+    const safeTitle = agreement.title.replace(/[^\w\s\-]/g, '').replace(/\s+/g, ' ').trim();
+    const storagePath = `${params.id}/${ownerName} - ${safeTitle}.pdf`;
+
+    // Remove any previously stored file for this agreement before uploading
+    const { data: existing } = await supabase.storage.from('agreements').list(params.id);
+    if (existing && existing.length > 0) {
+      await supabase.storage.from('agreements').remove(existing.map((f) => `${params.id}/${f.name}`));
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
 
     const { error: uploadError } = await supabase.storage
       .from('agreements')
-      .upload(`${params.id}.pdf`, bytes, {
-        contentType: 'application/pdf',
-        upsert: true,
-      });
+      .upload(storagePath, bytes, { contentType: 'application/pdf' });
 
     if (uploadError) return fail(500, { error: uploadError.message });
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('agreements')
-      .getPublicUrl(`${params.id}.pdf`);
+    const { data: { publicUrl } } = supabase.storage.from('agreements').getPublicUrl(storagePath);
 
     const { error: updateError } = await supabase
       .from('agreements')
@@ -100,10 +115,53 @@ export const actions: Actions = {
   },
 
   /**
+   * Email the agreement link to the client via Brevo.
+   * Agreement must be in 'sent' status and client must have an email address.
+   */
+  sendEmail: async ({ params, url }) => {
+    const { data: agreement } = await supabase
+      .from('agreements')
+      .select('*, clients(name, email)')
+      .eq('id', params.id)
+      .single();
+
+    if (!agreement?.clients?.email) return fail(400, { error: 'Client has no email address.' });
+    if (agreement.status !== 'sent') return fail(400, { error: 'Agreement must be sent before emailing.' });
+
+    const baseUrl = env.PUBLIC_BASE_URL;
+    if (!baseUrl) return fail(400, { error: 'PUBLIC_BASE_URL not set — cannot send emails with localhost links' });
+
+    const { data: settings } = await supabase.from('settings').select('owner_name').eq('id', 1).single();
+    const publicUrl = `${baseUrl}/agreements/${agreement.public_token}`;
+
+    try {
+      await sendAgreementEmail(
+        agreement.clients.email,
+        agreement.clients.name,
+        agreement.title,
+        publicUrl,
+        settings?.owner_name ?? 'Alvar Sirlin'
+      );
+    } catch (err) {
+      console.error('sendEmail error:', err);
+      return fail(500, { error: `Email failed: ${err instanceof Error ? err.message : err}` });
+    }
+  },
+
+  /**
    * Remove the uploaded PDF from storage and clear pdf_url on the agreement.
+   * Derives the storage path from the stored pdf_url to handle any filename.
    */
   removePdf: async ({ params }) => {
-    await supabase.storage.from('agreements').remove([`${params.id}.pdf`]);
+    const { data: agreement } = await supabase
+      .from('agreements').select('pdf_url').eq('id', params.id).single();
+
+    if (agreement?.pdf_url) {
+      const match = agreement.pdf_url.match(/\/object\/public\/agreements\/(.+)$/);
+      if (match) {
+        await supabase.storage.from('agreements').remove([decodeURIComponent(match[1])]);
+      }
+    }
 
     const { error: err } = await supabase
       .from('agreements')
