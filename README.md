@@ -24,8 +24,10 @@ A personal invoice management tool for freelancers. Ingest Toggl time entries, g
 - **Public invoice links** — shareable `/invoices/[token]` pages, no login required
 - **Print/PDF** — clean printable view with `@page` margin header and page numbers
 - **Client portal** — token-gated `/portal/[token]` page showing a client's invoices and agreements
-- **Agreements** — create markdown or PDF agreements, send to clients, email link via Brevo, track acceptance with timestamp + IP receipt
+- **Agreements** — create markdown or PDF agreements, send to clients, email link via Brevo, track acceptance with timestamp + IP + optional typed-name signature
 - **Agreement PDF naming** — uploaded PDFs stored as `{ownerName} - {title}.pdf` for friendly download names
+- **Agreement print/PDF** — "Download / Print PDF" prints the full agreement including acceptance receipt
+- **Slug URLs** — agreement public links use `slug--uuid` format for readability; bare UUID links are also accepted
 - **Trash** — soft-delete invoices, restore or purge; auto-purge of items older than 90 days on trash page load
 - **Invoice number pre-fill** — invoice number field auto-populated from client slug + year + sequence, editable before generating
 - **Owner auth** — single password login via `APP_PASSWORD` env var
@@ -62,6 +64,7 @@ Run migrations in order in the Supabase SQL editor:
 | `004_agreements.sql` | Agreements table |
 | `005_agreement_pdf.sql` | `pdf_url` on agreements, Supabase Storage bucket `agreements` |
 | Manual | `ALTER TABLE invoices ADD COLUMN deleted_at timestamptz DEFAULT NULL;` + index — enables soft delete / trash |
+| Manual | `ALTER TABLE agreements ADD COLUMN require_signature boolean NOT NULL DEFAULT false, ADD COLUMN accepted_name text;` — typed-name signature on acceptance |
 
 ### Supabase Storage
 
