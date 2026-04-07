@@ -7,6 +7,7 @@
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
   let saving = $state(false);
+  let requireSignature = $state(data.agreement.require_signature ?? false);
   let sending = $state(false);
   let emailing = $state(false);
   let retracting = $state(false);
@@ -24,8 +25,15 @@
   const isSent = $derived(data.agreement.status === 'sent');
   const isAccepted = $derived(data.agreement.status === 'accepted');
 
-  /** Public URL for this agreement */
-  const publicUrl = $derived(`${window?.location?.origin ?? ''}/agreements/${data.agreement.public_token}`);
+  /** Slugified title for readable URLs */
+  const titleSlug = $derived(
+    data.agreement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  );
+
+  /** Public URL using slug--token format for readable sharing links */
+  const publicUrl = $derived(
+    `${window?.location?.origin ?? ''}/agreements/${titleSlug}--${data.agreement.public_token}`
+  );
 
   /** Copy public URL to clipboard */
   async function copyUrl() {
@@ -159,6 +167,11 @@
       Title
       <input name="title" bind:value={title} required
         class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+    </label>
+
+    <label class="flex items-center gap-2 text-sm">
+      <input type="checkbox" name="require_signature" bind:checked={requireSignature} class="rounded" />
+      Require typed name to accept
     </label>
 
     <div class="flex flex-col gap-1 text-sm">

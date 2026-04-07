@@ -29,9 +29,11 @@ export const actions: Actions = {
 
     if (!title) return fail(400, { error: 'Title is required.' });
 
+    const requireSignature = data.get('require_signature') === 'on';
+
     const { error: err } = await supabase
       .from('agreements')
-      .update({ title, content, updated_at: new Date().toISOString() })
+      .update({ title, content, require_signature: requireSignature, updated_at: new Date().toISOString() })
       .eq('id', params.id)
       .eq('status', 'draft');
 

@@ -29,8 +29,10 @@
 
 <style>
   @media print {
-    :global(body > *) { display: none; }
-    :global(#acceptance-receipt) { display: block !important; }
+    :global(body *) { visibility: hidden; }
+    :global(#agreement-document) { visibility: visible; position: absolute; top: 0; left: 0; width: 100%; }
+    :global(#agreement-document *) { visibility: visible; }
+    :global(.no-print) { display: none !important; }
   }
 </style>
 
@@ -38,7 +40,7 @@
   <title>{data.agreement.title}</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-gray-900">
+<div id="agreement-document" class="max-w-3xl mx-auto px-6 py-10 font-sans text-gray-900">
 
   <!-- Header -->
   <div class="flex justify-between items-start mb-8">
@@ -128,6 +130,12 @@
           <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Time</div>
           <div class="font-medium">{time}</div>
         </div>
+        {#if data.agreement.accepted_name}
+          <div class="space-y-1 col-span-2">
+            <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Signature</div>
+            <div class="font-medium italic text-lg">{data.agreement.accepted_name}</div>
+          </div>
+        {/if}
         {#if data.agreement.accepted_ip}
           <div class="space-y-1 col-span-2">
             <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">IP Address</div>
@@ -166,7 +174,15 @@
             accepting = true;
             return async ({ update }) => { accepting = false; await update(); };
           }}
-          class="flex gap-3">
+          class="flex flex-col gap-3">
+          {#if true || data.agreement.require_signature}
+            <label class="flex flex-col gap-1 text-sm">
+              <span>Type your full name to sign</span>
+              <input name="accepted_name" required autocomplete="name"
+                class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#337638]" />
+            </label>
+          {/if}
+          <div class="flex gap-3">
           <button type="submit" disabled={accepting}
             class="bg-[#337638] text-white px-4 py-2 rounded text-sm transition-colors hover:bg-[#14145a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
             {#if accepting}<Spinner />{/if}
@@ -176,6 +192,7 @@
             class="border border-gray-300 px-4 py-2 rounded text-sm text-gray-600 hover:bg-gray-50 transition-colors">
             Cancel
           </button>
+          </div>
         </form>
       </div>
     {/if}
