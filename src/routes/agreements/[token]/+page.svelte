@@ -12,28 +12,56 @@
   const isSent = $derived(data.agreement.status === 'sent');
   const isAccepted = $derived(data.agreement.status === 'accepted');
 
+  /**
+   * Format an ISO timestamp into a readable date and time string.
+   * @param iso - ISO 8601 timestamp string
+   */
+  function formatAcceptedAt(iso: string): { date: string; time: string } {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
+    return { date, time };
+  }
+
 </script>
 
 <svelte:window onkeydown={(e) => { if (e.key === 'Escape') showConfirm = false; }} />
+
+<style>
+  @media print {
+    :global(body > *) { display: none; }
+    :global(#acceptance-receipt) { display: block !important; }
+  }
+</style>
 
 <svelte:head>
   <title>{data.agreement.title}</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-[#337638]">
+<div class="max-w-3xl mx-auto px-6 py-10 font-sans text-gray-900">
 
   <!-- Header -->
   <div class="flex justify-between items-start mb-8">
-    <div>
-      <h1 class="text-3xl font-bold">{data.agreement.title}</h1>
-      <div class="text-sm text-gray-500 mt-1">
+    <div class="space-y-1">
+      <h1 class="text-3xl font-bold text-gray-900">{data.agreement.title}</h1>
+      <div class="text-sm text-gray-600">
         {data.agreement.clients?.name}
         {#if data.agreement.clients?.company} — {data.agreement.clients.company}{/if}
       </div>
-      {#if data.settings?.owner_name}
-        <div class="text-sm text-gray-500">Prepared by {data.settings.owner_name}</div>
-      {/if}
+      <div class="text-sm text-gray-500">
+        {new Date(data.agreement.sent_at ?? data.agreement.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </div>
     </div>
+    {#if data.settings?.owner_name}
+      <div class="text-right text-sm text-gray-600 space-y-0.5">
+        <div class="font-medium">{data.settings.owner_name}</div>
+        <div class="text-gray-500">Web Development</div>
+        {#if data.settings.email}
+          <div><a href="mailto:{data.settings.email}" class="text-[#ff3103] hover:underline">{data.settings.email}</a></div>
+        {/if}
+        <div><a href="https://alvarsirlin.dev" target="_blank" rel="noopener" class="text-[#ff3103] hover:underline">alvarsirlin.dev</a></div>
+      </div>
+    {/if}
   </div>
 
   <!-- Agreement content: PDF takes precedence if present, markdown shown below if both exist -->
@@ -54,29 +82,65 @@
     {/if}
 
     {#if data.contentHtml}
-      <div class="prose prose-sm max-w-none
-        [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638]
-        [&_a]:text-[#ff3103]">
+      <div class="markdown text-gray-900">
         {@html data.contentHtml}
       </div>
     {/if}
 
   </div>
 
-  <!-- Accepted receipt -->
-  {#if isAccepted}
-    <div class="bg-green-50 border border-green-200 rounded px-5 py-4 text-sm">
-      <div class="font-semibold text-green-800 text-base mb-1">Agreement Accepted</div>
-      <div class="text-green-700">
-        Accepted on {data.agreement.accepted_at?.slice(0, 10)}
+  <!-- Acceptance receipt -->
+  {#if isAccepted && data.agreement.accepted_at}
+    {@const { date, time } = formatAcceptedAt(data.agreement.accepted_at)}
+    <div id="acceptance-receipt" class="border-2 border-[#337638] rounded-lg p-8 space-y-6 print:border-black">
+
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Electronic Acceptance Receipt</div>
+          <h2 class="text-xl font-bold text-[#337638] print:text-black">{data.agreement.title}</h2>
+        </div>
+        <button
+          type="button"
+          onclick={() => window.print()}
+          class="text-xs border border-gray-300 rounded px-3 py-1.5 text-gray-500 hover:bg-gray-50 transition-colors print:hidden"
+        >
+          Print / Save PDF
+        </button>
       </div>
-      <div class="text-green-700 mt-2">
-        {data.agreement.clients?.name}
-        {#if data.agreement.clients?.company} — {data.agreement.clients.company}{/if}
+
+      <div class="grid grid-cols-2 gap-6 text-sm border-t border-gray-200 pt-6">
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Prepared by</div>
+          <div class="font-medium">{data.settings?.owner_name ?? '—'}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Accepted by</div>
+          <div class="font-medium">{data.agreement.clients?.name ?? '—'}</div>
+          {#if data.agreement.clients?.company}
+            <div class="text-gray-500">{data.agreement.clients.company}</div>
+          {/if}
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Date</div>
+          <div class="font-medium">{date}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Time</div>
+          <div class="font-medium">{time}</div>
+        </div>
+        {#if data.agreement.accepted_ip}
+          <div class="space-y-1 col-span-2">
+            <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold">IP Address</div>
+            <div class="font-mono text-sm">{data.agreement.accepted_ip}</div>
+          </div>
+        {/if}
       </div>
-      {#if data.settings?.owner_name}
-        <div class="text-green-700">{data.settings.owner_name}</div>
-      {/if}
+
+      <div class="border-t border-gray-200 pt-5 text-xs text-gray-500 leading-relaxed">
+        By clicking "Confirm Acceptance," the accepting party indicated agreement to the terms of this document.
+        This receipt serves as a record of that electronic acceptance, including the date, time, and IP address
+        at which the acceptance was recorded.
+      </div>
     </div>
   {/if}
 

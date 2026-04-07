@@ -73,35 +73,46 @@
   </div>
 {/if}
 
-<!-- Public link (sent or accepted) -->
-{#if isSent || isAccepted}
-  <div class="flex items-center gap-2 mb-4 flex-wrap">
-    <span class="text-sm text-gray-500 truncate">{publicUrl}</span>
+<!-- Public link — always visible as a preview; copy only available when sent/accepted -->
+<div class="flex items-center gap-2 mb-4 flex-wrap">
+  <span class="text-sm text-gray-500 truncate">{publicUrl}</span>
+  {#if isSent || isAccepted}
     <button type="button" onclick={copyUrl}
       class="text-xs border rounded px-2 py-1 hover:bg-gray-50 transition-colors shrink-0">
       Copy link
     </button>
-    <a href={publicUrl} target="_blank"
-      class="text-xs text-[#337638] hover:underline shrink-0">Open</a>
-  </div>
-
-  {#if isSent && data.agreement.clients?.email}
-    <form method="POST" action="?/sendEmail"
-      use:enhance={() => {
-        emailing = true;
-        return async ({ update }) => { emailing = false; await update(); };
-      }}
-      class="mb-6">
-      <button type="submit" disabled={emailing}
-        class="bg-[#337638] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
-        {#if emailing}<Spinner />{/if}
-        Email Agreement to Client
-      </button>
-      <p class="text-xs text-gray-400 mt-1">Sends to {data.agreement.clients.email}</p>
-    </form>
-  {:else if isSent}
-    <p class="text-xs text-gray-400 mb-6">No email on file for this client — share the link manually.</p>
   {/if}
+  <a href={publicUrl} target="_blank"
+    class="text-xs text-[#337638] hover:underline shrink-0">Open</a>
+</div>
+
+<!-- Live preview of client-facing page -->
+<div class="mb-6">
+  <div class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Client Preview</div>
+  <iframe
+    src={publicUrl}
+    title="Agreement preview"
+    class="w-full rounded border bg-white"
+    style="height: 60vh; min-height: 400px;"
+  ></iframe>
+</div>
+
+{#if isSent && data.agreement.clients?.email}
+  <form method="POST" action="?/sendEmail"
+    use:enhance={() => {
+      emailing = true;
+      return async ({ update }) => { emailing = false; await update(); };
+    }}
+    class="mb-6">
+    <button type="submit" disabled={emailing}
+      class="bg-[#337638] text-white px-5 py-2 rounded text-sm transition-colors hover:bg-[#14145a] active:bg-[#0f0f4a] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+      {#if emailing}<Spinner />{/if}
+      Email Agreement to Client
+    </button>
+    <p class="text-xs text-gray-400 mt-1">Sends to {data.agreement.clients.email}</p>
+  </form>
+{:else if isSent}
+  <p class="text-xs text-gray-400 mb-6">No email on file for this client — share the link manually.</p>
 {/if}
 
 <!-- Send / Retract actions -->
@@ -171,10 +182,9 @@
         </textarea>
       {:else}
         <textarea name="content" class="hidden" value={content}></textarea>
-        <div class="border rounded px-4 py-3 min-h-[20rem] bg-gray-50 prose prose-sm max-w-none
-          [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638] [&_a]:text-[#ff3103]">
+        <div class="border rounded px-4 py-3 min-h-[20rem] bg-gray-50 markdown text-gray-800">
           {#if content}
-            {@html marked(content)}
+            {@html marked.parse(content)}
           {:else}
             <p class="text-gray-400">Nothing to preview.</p>
           {/if}
@@ -191,8 +201,8 @@
 {:else}
   <!-- Read-only content display -->
   {#if data.agreement.content}
-    <div class="max-w-2xl border rounded px-4 py-3 bg-gray-50">
-      <pre class="whitespace-pre-wrap font-sans text-sm">{data.agreement.content}</pre>
+    <div class="max-w-2xl border rounded px-4 py-3 bg-gray-50 markdown text-gray-800">
+      {@html marked.parse(data.agreement.content)}
     </div>
   {/if}
 {/if}

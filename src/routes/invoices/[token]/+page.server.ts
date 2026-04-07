@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
 
-  const notesHtml = invoice.notes ? await marked(invoice.notes) : null;
+  const notesHtml = invoice.notes ? marked.parse(invoice.notes) as string : null;
 
   return {
     invoice,

@@ -182,9 +182,7 @@
 
   <!-- Notes (optional markdown) -->
   {#if notesHtml}
-    <div class="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-700
-      [&_h1]:text-[#337638] [&_h2]:text-[#337638] [&_h3]:text-[#337638] [&_a]:text-[#ff3103]
-      prose prose-sm max-w-none">
+    <div class="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-700 markdown">
       {@html notesHtml}
     </div>
   {/if}

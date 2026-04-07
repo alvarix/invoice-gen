@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params }) => {
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single();
 
   /** Render markdown content to HTML for safe server-side display */
-  const contentHtml = agreement.content ? await marked(agreement.content) : '';
+  const contentHtml = agreement.content ? marked.parse(agreement.content) : '';
 
   return { agreement, settings, contentHtml };
 };

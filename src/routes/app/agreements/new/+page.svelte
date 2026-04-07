@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
   import Spinner from '$lib/components/Spinner.svelte';
+  import { marked } from 'marked';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -72,10 +73,9 @@
     {:else}
       <!-- Hidden textarea keeps the value in the form -->
       <textarea name="content" class="hidden" value={content}></textarea>
-      <div class="border rounded px-4 py-3 min-h-[20rem] prose prose-sm max-w-none bg-gray-50">
+      <div class="border rounded px-4 py-3 min-h-[20rem] markdown text-gray-800 bg-gray-50">
         {#if content.trim()}
-          <p class="text-gray-400 text-xs mb-2 font-sans not-prose">Preview (markdown will render on the public page)</p>
-          <pre class="whitespace-pre-wrap font-sans text-sm">{content}</pre>
+          {@html marked.parse(content)}
         {:else}
           <p class="text-gray-400 text-sm">Nothing to preview yet.</p>
         {/if}

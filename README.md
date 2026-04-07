@@ -24,7 +24,10 @@ A personal invoice management tool for freelancers. Ingest Toggl time entries, g
 - **Public invoice links** — shareable `/invoices/[token]` pages, no login required
 - **Print/PDF** — clean printable view with `@page` margin header and page numbers
 - **Client portal** — token-gated `/portal/[token]` page showing a client's invoices and agreements
-- **Agreements** — create markdown or PDF agreements, send to clients, track acceptance online
+- **Agreements** — create markdown or PDF agreements, send to clients, email link via Brevo, track acceptance with timestamp + IP receipt
+- **Agreement PDF naming** — uploaded PDFs stored as `{ownerName} - {title}.pdf` for friendly download names
+- **Trash** — soft-delete invoices, restore or purge; auto-purge of items older than 90 days on trash page load
+- **Invoice number pre-fill** — invoice number field auto-populated from client slug + year + sequence, editable before generating
 - **Owner auth** — single password login via `APP_PASSWORD` env var
 
 ## Setup
@@ -58,6 +61,7 @@ Run migrations in order in the Supabase SQL editor:
 | `003_client_portal.sql` | `portal_token` on clients, `notes` on invoices |
 | `004_agreements.sql` | Agreements table |
 | `005_agreement_pdf.sql` | `pdf_url` on agreements, Supabase Storage bucket `agreements` |
+| Manual | `ALTER TABLE invoices ADD COLUMN deleted_at timestamptz DEFAULT NULL;` + index — enables soft delete / trash |
 
 ### Supabase Storage
 
@@ -71,10 +75,11 @@ Migration `005` creates a public bucket named `agreements` for PDF uploads. The 
 |---|---|
 | `/login` | Owner login |
 | `/app/invoices/new` | Create invoice (Toggl paste, CSV, or manual) |
-| `/app/history` | Invoice history |
+| `/app/history` | Invoice history with soft-delete |
+| `/app/trash` | Trashed invoices — restore or permanently delete, auto-purges after 90 days |
 | `/app/agreements` | Agreements list |
 | `/app/agreements/new` | Create agreement |
-| `/app/agreements/[id]` | Edit, send, upload PDF, track acceptance |
+| `/app/agreements/[id]` | Edit, send, email to client, upload PDF, live client preview, track acceptance |
 | `/app/clients` | Client management + portal link copy/reset |
 | `/app/settings` | Owner info used on invoices |
 
