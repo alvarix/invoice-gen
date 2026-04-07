@@ -184,9 +184,11 @@
   </form>
 {:else}
   <!-- Read-only content display -->
-  <div class="max-w-2xl border rounded px-4 py-3 bg-gray-50">
-    <pre class="whitespace-pre-wrap font-sans text-sm">{data.agreement.content || '(no content)'}</pre>
-  </div>
+  {#if data.agreement.content}
+    <div class="max-w-2xl border rounded px-4 py-3 bg-gray-50">
+      <pre class="whitespace-pre-wrap font-sans text-sm">{data.agreement.content}</pre>
+    </div>
+  {/if}
 {/if}
 
 <!-- PDF attachment -->

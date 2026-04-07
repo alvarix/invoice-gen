@@ -61,9 +61,6 @@
       </div>
     {/if}
 
-    {#if !data.agreement.pdf_url && !data.contentHtml}
-      <p class="text-gray-400 text-sm">(No content)</p>
-    {/if}
   </div>
 
   <!-- Accepted receipt -->
