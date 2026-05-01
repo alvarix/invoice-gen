@@ -3,9 +3,9 @@
   let { children } = $props();
 
   const nav = [
-    { href: '/app/invoices/new', label: 'New Invoice' },
-        { href: '/app/agreements/new', label: 'New Agreement' },
-    { href: '/app/history', label: 'History' },
+    { href: '/app/invoices/new', label: '+ New Invoice' },
+        { href: '/app/agreements/new', label: '+ New Agreement' },
+    { href: '/app/history', label: 'Invoices' },
 
     { href: '/app/agreements', label: 'Agreements' },
     { href: '/app/clients', label: 'Clients' },
