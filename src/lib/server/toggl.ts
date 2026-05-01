@@ -85,29 +85,36 @@ function parseTogglColumns(text: string): ParsedEntry[] {
 }
 
 /**
- * Parse Toggl copy/paste text into time entries.
- * @param text - raw pasted text from Toggl
- * @param columns - true to use the columnar screenshot format (DESCRIPTION/DATE/DURATION sections);
- *                  false (default) for the legacy interleaved format
+ * Parse Toggl's interleaved paste format, with or without per-entry dates.
+ *
+ * Handles two variants:
+ *   Legacy (no dates):   description / project / duration
+ *   With dates:          description / MM/DD/YYYY / project / duration
+ *
+ * @param text - raw pasted text
  * @returns array of parsed entries
  */
-export function parseTogglPaste(text: string, columns = false): ParsedEntry[] {
-  if (columns) {
-    return parseTogglColumns(text);
-  }
+function parseTogglInterleaved(text: string): ParsedEntry[] {
   const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
   const entries: ParsedEntry[] = [];
+  const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
 
   for (let i = 0; i < lines.length; i++) {
-    // Duration is always h:mm:ss from Toggl
     if (!/^\d+:\d{2}:\d{2}$/.test(lines[i])) continue;
 
     const duration_raw = lines[i];
 
-    // i-1 is the client/project line (always skip it)
-    // Walk back further past any "(N)" count lines to find the description
+    // i-1 is always the project/client line — skip it
     let descIdx = i - 2;
     while (descIdx >= 0 && /^\(\d+\)$/.test(lines[descIdx])) descIdx--;
+
+    let date: string | null = null;
+    if (descIdx >= 0 && datePattern.test(lines[descIdx])) {
+      const parts = lines[descIdx].split('/');
+      date = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      descIdx--;
+      while (descIdx >= 0 && /^\(\d+\)$/.test(lines[descIdx])) descIdx--;
+    }
 
     const description =
       descIdx >= 0 && !/^\d+:\d{2}:\d{2}$/.test(lines[descIdx])
@@ -121,11 +128,28 @@ export function parseTogglPaste(text: string, columns = false): ParsedEntry[] {
       duration_raw,
       duration_rounded: formatDuration(roundedSeconds),
       hours_rounded: roundedSeconds / 3600,
-      date: null
+      date
     });
   }
 
   return entries;
+}
+
+/**
+ * Parse Toggl copy/paste text into time entries.
+ * @param text - raw pasted text from Toggl
+ * @param columns - true to use the columnar format (DESCRIPTION/DATE/DURATION section headers);
+ *                  false (default) for the legacy interleaved format
+ * @returns array of parsed entries
+ */
+export function parseTogglPaste(text: string, columns = false): ParsedEntry[] {
+  if (columns) {
+    const result = parseTogglColumns(text);
+    // Fall back to interleaved parser when no column headers are present
+    if (result.length > 0) return result;
+    return parseTogglInterleaved(text);
+  }
+  return parseTogglInterleaved(text);
 }
 
 /**

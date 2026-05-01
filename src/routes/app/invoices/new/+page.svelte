@@ -135,6 +135,15 @@
   /** Time items (shown after separator) */
   let timeItems = $derived(items.filter(i => i.type === 'time'));
 
+  /** Total rounded hours across all time entries */
+  let totalHoursRounded = $derived(
+    timeItems.reduce((sum, item) => {
+      if (!item.duration_rounded) return sum;
+      const parts = item.duration_rounded.split(':').map(Number);
+      return sum + (parts[0] || 0) + (parts[1] || 0) / 60;
+    }, 0)
+  );
+
   /** Sum of all item amounts */
   let subtotal = $derived(items.reduce((s, item) => s + Number(item.amount), 0));
 
@@ -454,6 +463,12 @@
 
       <!-- Totals preview -->
       <div class="ml-auto w-64 space-y-1 text-sm text-right pt-2">
+        {#if timeItems.length > 0}
+          <div class="flex justify-between text-gray-500 text-xs pb-1">
+            <span>Total hours (rounded)</span>
+            <span class="font-mono">{Math.floor(totalHoursRounded)}h {String(Math.round((totalHoursRounded % 1) * 60)).padStart(2, '0')}m</span>
+          </div>
+        {/if}
         <div class="flex justify-between">
           <span class="text-gray-600">Subtotal</span>
           <span class="font-medium">{formatCurrency(subtotal)}</span>

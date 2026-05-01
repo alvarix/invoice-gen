@@ -19,7 +19,8 @@ export const actions: Actions = {
     if (!client) return fail(400, { error: 'Client not found' });
     const pasteFormat = data.get('paste_format') as string;
     const isColumns = pasteFormat === 'columns';
-    const looksLegacy = /^\d+:\d{2}:\d{2}$/m.test(text);
+    const hasDateLines = /^\d{2}\/\d{2}\/\d{4}$/m.test(text);
+    const looksLegacy = /^\d+:\d{2}:\d{2}$/m.test(text) && !hasDateLines;
     const looksColumnar = /^DESCRIPTION/im.test(text) && /^DURATION/im.test(text);
     if (isColumns && looksLegacy && !looksColumnar) {
       return fail(400, { error: 'This looks like legacy format. Switch to Legacy mode.' });
